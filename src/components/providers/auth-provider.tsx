@@ -28,11 +28,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return
         }
         
-        const token = localStorage.getItem('access_token')
-        if (!token) {
-          setState({ user: null, isLoading: false, isAuthenticated: false })
-          return
-        }
+            // Verificar token no localStorage ou cookies
+            const token = localStorage.getItem('access_token') || 
+                         document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1]
+            
+            if (!token) {
+              setState({ user: null, isLoading: false, isAuthenticated: false })
+              return
+            }
 
         // Verificar se o token é válido
         const payload = jwt.decode(token) as TokenPayload
@@ -86,10 +89,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const token = data.session.access_token
         const refreshToken = data.session.refresh_token
 
-        // Salvar tokens
+        // Salvar tokens em cookies para o middleware acessar
         if (typeof window !== 'undefined') {
           localStorage.setItem('access_token', token)
           localStorage.setItem('refresh_token', refreshToken)
+          
+          // Também salvar em cookies para o middleware
+          document.cookie = `access_token=${token}; path=/; max-age=3600; secure; samesite=strict`
+          document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; secure; samesite=strict`
         }
 
         // Buscar dados do usuário
@@ -122,6 +129,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
+        
+        // Limpar cookies também
+        document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       }
       setState({
         user: null,

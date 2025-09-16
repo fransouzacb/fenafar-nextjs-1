@@ -25,10 +25,6 @@ model User {
   cpf           String?   @unique
   cargo         String?
   
-  // Relacionamento com sindicato (para admin - relacionamento 1:1)
-  adminOfSindicatoId String?   @unique
-  adminOfSindicato   Sindicato? @relation("SindicatoAdmin", fields: [adminOfSindicatoId], references: [id])
-  
   // Relacionamento com sindicato (para membro - relacionamento N:1)
   sindicatoId   String?
   sindicato     Sindicato? @relation("SindicatoMembros", fields: [sindicatoId], references: [id])
@@ -56,7 +52,6 @@ model Sindicato {
   updatedAt   DateTime @updatedAt
   
   // Relacionamentos
-  admin       User?      @relation("SindicatoAdmin")
   membros     User[]     @relation("SindicatoMembros")
   documentos  Documento[]
   convites    Convite[]

@@ -36,10 +36,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar ou criar usuário no banco Prisma
+    // Buscar usuário no banco Prisma
     let user = await prisma.user.findUnique({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailConfirmed: true,
+        active: true,
+        cpf: true,
+        cargo: true,
+        sindicatoId: true,
+        createdAt: true,
+        updatedAt: true,
         sindicato: {
           select: {
             id: true,
@@ -61,7 +73,19 @@ export async function POST(request: NextRequest) {
           active: true,
           emailConfirmed: !!data.user.email_confirmed_at,
         },
-        include: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          role: true,
+          emailConfirmed: true,
+          active: true,
+          cpf: true,
+          cargo: true,
+          sindicatoId: true,
+          createdAt: true,
+          updatedAt: true,
           sindicato: {
             select: {
               id: true,

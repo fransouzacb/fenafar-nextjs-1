@@ -56,11 +56,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       await login(formData)
       toast.success('Login realizado com sucesso!')
       
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        router.push(redirectTo)
-      }
+      // Aguardar um pouco para garantir que o estado foi atualizado
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess()
+        } else {
+          router.push(redirectTo)
+        }
+      }, 100)
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login')
       toast.error('Erro ao fazer login')

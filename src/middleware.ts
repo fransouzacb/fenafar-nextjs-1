@@ -14,6 +14,13 @@ const publicRoutes = [
   '/api/convites/accept',
 ]
 
+// Rotas que são protegidas pelo cliente (não pelo middleware)
+const clientProtectedRoutes = [
+  '/admin',
+  '/dashboard',
+  '/sindicato',
+]
+
 // Rotas que precisam de roles específicas
 const roleRoutes = {
   '/admin': [UserRole.FENAFAR_ADMIN],
@@ -26,6 +33,10 @@ const roleRoutes = {
 
 function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some(route => pathname.startsWith(route))
+}
+
+function isClientProtectedRoute(pathname: string): boolean {
+  return clientProtectedRoutes.some(route => pathname.startsWith(route))
 }
 
 function getRequiredRole(pathname: string): UserRole[] | null {
@@ -60,9 +71,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Permitir rotas protegidas pelo cliente (deixar o cliente fazer a verificação)
+  if (isClientProtectedRoute(pathname)) {
+    return NextResponse.next()
+  }
+
   // Verificar token de autenticação
   const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
-                request.cookies.get('access_token')?.value
+                request.cookies.get('access_token')?.value ||
+                request.headers.get('x-access-token')
 
   if (!token) {
     // Redirecionar para login se não estiver autenticado
