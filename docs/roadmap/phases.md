@@ -225,6 +225,7 @@ src/
 
 ### 🎯 Entregas
 - [x] **CRUD de Sindicatos** funcionando ✅
+- [ ] **Painel do Sindicato** implementado
 - [ ] **CRUD de Membros** funcionando
 - [ ] **Sistema de convites** implementado
 - [ ] **Upload de documentos** funcionando
@@ -248,26 +249,32 @@ src/
 - **Permissões**: Apenas FENAFAR_ADMIN pode gerenciar
 - **Interface**: Formulários responsivos com validação em tempo real
 
-#### 4.2 CRUD de Membros (90 min)
+#### 4.2 Painel do Sindicato (60 min)
+- [ ] Dashboard do sindicato
+- [ ] Layout específico para SINDICATO_ADMIN
+- [ ] Navegação entre seções
+- [ ] Estatísticas do sindicato
+
+#### 4.3 CRUD de Membros (90 min)
 - [ ] Listagem de membros
 - [ ] Criação de membro
 - [ ] Edição de membro
 - [ ] Exclusão de membro
 - [ ] Validações
 
-#### 4.3 Sistema de Convites (75 min)
+#### 4.4 Sistema de Convites (75 min)
 - [ ] Envio de convites
 - [ ] Aceitação de convites
 - [ ] Listagem de convites
 - [ ] Expiração de convites
 
-#### 4.4 Upload de Documentos (90 min)
+#### 4.5 Upload de Documentos (90 min)
 - [ ] Upload de avatares
 - [ ] Upload de documentos
 - [ ] Validação de arquivos
 - [ ] Geração de URLs
 
-#### 4.5 Dashboard (90 min)
+#### 4.6 Dashboard (90 min)
 - [ ] Estatísticas gerais
 - [ ] Gráficos de dados
 - [ ] Relatórios básicos
