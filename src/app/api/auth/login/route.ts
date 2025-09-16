@@ -97,11 +97,30 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({
-      user,
-      accessToken: data.session.access_token,
-      refreshToken: data.session.refresh_token,
-    })
+        const response = NextResponse.json({
+          user,
+          accessToken: data.session.access_token,
+          refreshToken: data.session.refresh_token,
+        })
+
+        // Definir cookies HTTP-only para autenticação
+        response.cookies.set('access_token', data.session.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 3600, // 1 hora
+          path: '/'
+        })
+
+        response.cookies.set('refresh_token', data.session.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 86400, // 24 horas
+          path: '/'
+        })
+
+        return response
 
   } catch (error) {
     console.error('Erro no login:', error)

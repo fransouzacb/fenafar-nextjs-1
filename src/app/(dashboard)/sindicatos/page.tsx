@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/components/providers/auth-provider'
+import { useAuthSimple } from '@/hooks/use-auth-simple'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -50,7 +50,7 @@ interface Sindicato {
 }
 
 export default function SindicatosPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useAuthSimple()
   const [sindicatos, setSindicatos] = useState<Sindicato[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -65,37 +65,15 @@ export default function SindicatosPage() {
 
   const loadSindicatos = async () => {
     try {
-      if (typeof window === 'undefined') {
-        setIsLoading(false)
-        return
-      }
-      
-      const token = localStorage.getItem('access_token')
-      console.log('Token encontrado:', token ? 'Sim' : 'Não')
-      
-      if (!token) {
-        console.log('Token não encontrado, aguardando autenticação...')
-        setIsLoading(false)
-        return
-      }
-
-      console.log('Fazendo requisição para /api/sindicatos...')
-      const response = await fetch('/api/sindicatos', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      console.log('Resposta da API:', response.status, response.statusText)
+      console.log('Carregando sindicatos...')
+      const response = await fetch('/api/sindicatos')
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Erro na resposta:', errorText)
         throw new Error('Erro ao carregar sindicatos')
       }
 
       const data = await response.json()
-      console.log('Dados recebidos:', data)
+      console.log('Sindicatos carregados:', data.length)
       setSindicatos(data)
     } catch (error) {
       console.error('Erro ao carregar sindicatos:', error)
@@ -111,14 +89,8 @@ export default function SindicatosPage() {
     }
 
     try {
-      const token = localStorage.getItem('access_token')
-      if (!token) return
-
       const response = await fetch(`/api/sindicatos/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       })
 
       if (!response.ok) {
@@ -135,14 +107,8 @@ export default function SindicatosPage() {
 
   const handleApprove = async (id: string) => {
     try {
-      const token = localStorage.getItem('access_token')
-      if (!token) return
-
       const response = await fetch(`/api/sindicatos/${id}/approve`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'POST'
       })
 
       if (!response.ok) {
@@ -163,14 +129,8 @@ export default function SindicatosPage() {
     }
 
     try {
-      const token = localStorage.getItem('access_token')
-      if (!token) return
-
       const response = await fetch(`/api/sindicatos/${id}/reject`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'POST'
       })
 
       if (!response.ok) {

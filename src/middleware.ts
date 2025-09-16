@@ -16,9 +16,6 @@ const publicRoutes = [
 
 // Rotas que são protegidas pelo cliente (não pelo middleware)
 const clientProtectedRoutes = [
-  '/admin',
-  '/dashboard',
-  '/sindicato',
   '/api/auth/me', // Permitir que o cliente gerencie a autenticação
 ]
 
@@ -95,10 +92,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Verificar token de autenticação
-  const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
-                request.cookies.get('access_token')?.value ||
-                request.headers.get('x-access-token')
+      // Verificar token de autenticação (priorizar cookies HTTP-only)
+      const token = request.cookies.get('access_token')?.value ||
+                    request.headers.get('authorization')?.replace('Bearer ', '') ||
+                    request.headers.get('x-access-token')
 
   if (!token) {
     // Redirecionar para login se não estiver autenticado
