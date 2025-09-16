@@ -5,57 +5,19 @@ import { UserRole } from '@prisma/client'
 // GET /api/sindicatos - Listar sindicatos
 export async function GET(request: NextRequest) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization || !authorization.startsWith('Bearer ')) {
+    // O middleware já verificou a autenticação e role
+    const userId = request.headers.get('x-user-id')
+    const userRole = request.headers.get('x-user-role')
+
+    if (!userId || !userRole) {
       return NextResponse.json(
-        { error: 'Token de autorização necessário' },
+        { error: 'Dados de usuário não encontrados' },
         { status: 401 }
-      )
-    }
-
-    const token = authorization.replace('Bearer ', '')
-    
-    // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
-    const payload = jwt.decode(token) as any
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      )
-    }
-
-    // Verificar se o token expirou
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return NextResponse.json(
-        { error: 'Token expirado' },
-        { status: 401 }
-      )
-    }
-
-    // Buscar usuário no banco para verificar role
-    const userId = payload.sub || payload.user_id
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'ID do usuário não encontrado no token' },
-        { status: 401 }
-      )
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true }
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
       )
     }
 
     // Apenas FENAFAR_ADMIN pode listar todos os sindicatos
-    if (user.role !== UserRole.FENAFAR_ADMIN) {
+    if (userRole !== UserRole.FENAFAR_ADMIN) {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas administradores FENAFAR podem listar sindicatos.' },
         { status: 403 }
