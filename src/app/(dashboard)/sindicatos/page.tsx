@@ -16,7 +16,11 @@ import {
   MapPin,
   Phone,
   Mail,
-  Globe
+  Globe,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
@@ -35,6 +39,9 @@ interface Sindicato {
   website?: string
   description?: string
   active: boolean
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  approvedAt?: string
+  approvedBy?: string
   createdAt: string
   updatedAt: string
   _count: {
@@ -118,6 +125,85 @@ export default function SindicatosPage() {
     }
   }
 
+  const handleApprove = async (id: string) => {
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) return
+
+      const response = await fetch(`/api/sindicatos/${id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao aprovar sindicato')
+      }
+
+      toast.success('Sindicato aprovado com sucesso!')
+      loadSindicatos()
+    } catch (error) {
+      console.error('Erro ao aprovar sindicato:', error)
+      toast.error('Erro ao aprovar sindicato')
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    if (!confirm('Tem certeza que deseja rejeitar este sindicato?')) {
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) return
+
+      const response = await fetch(`/api/sindicatos/${id}/reject`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao rejeitar sindicato')
+      }
+
+      toast.success('Sindicato rejeitado com sucesso!')
+      loadSindicatos()
+    } catch (error) {
+      console.error('Erro ao rejeitar sindicato:', error)
+      toast.error('Erro ao rejeitar sindicato')
+    }
+  }
+
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return {
+          icon: CheckCircle,
+          color: 'text-green-600',
+          bgColor: 'bg-green-100',
+          text: 'Aprovado'
+        }
+      case 'REJECTED':
+        return {
+          icon: XCircle,
+          color: 'text-red-600',
+          bgColor: 'bg-red-100',
+          text: 'Rejeitado'
+        }
+      case 'PENDING':
+      default:
+        return {
+          icon: Clock,
+          color: 'text-yellow-600',
+          bgColor: 'bg-yellow-100',
+          text: 'Pendente'
+        }
+    }
+  }
+
   const filteredSindicatos = sindicatos.filter(sindicato =>
     sindicato.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sindicato.cnpj.includes(searchTerm) ||
@@ -179,7 +265,7 @@ export default function SindicatosPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -194,11 +280,24 @@ export default function SindicatosPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Sindicatos Ativos</p>
+                <p className="text-sm font-medium text-gray-500">Aprovados</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sindicatos.filter(s => s.active).length}
+                  {sindicatos.filter(s => s.status === 'APPROVED').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Clock className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Pendentes</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {sindicatos.filter(s => s.status === 'PENDING').length}
                 </p>
               </div>
             </div>
@@ -241,9 +340,23 @@ export default function SindicatosPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={sindicato.active ? "default" : "secondary"}>
-                    {sindicato.active ? 'Ativo' : 'Inativo'}
-                  </Badge>
+                  <div className="flex flex-col items-end space-y-2">
+                    <Badge variant={sindicato.active ? "default" : "secondary"}>
+                      {sindicato.active ? 'Ativo' : 'Inativo'}
+                    </Badge>
+                    {(() => {
+                      const statusInfo = getStatusInfo(sindicato.status)
+                      return (
+                        <Badge 
+                          variant="outline" 
+                          className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
+                        >
+                          <statusInfo.icon className="h-3 w-3 mr-1" />
+                          {statusInfo.text}
+                        </Badge>
+                      )
+                    })()}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -287,6 +400,26 @@ export default function SindicatosPage() {
                     {sindicato._count.membros} membros
                   </div>
                   <div className="flex space-x-2">
+                    {sindicato.status === 'PENDING' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleApprove(sindicato.id)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleReject(sindicato.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

@@ -21,6 +21,7 @@ interface SindicatoFormData {
   website?: string
   description?: string
   active: boolean
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED'
 }
 
 interface SindicatoFormProps {
@@ -47,7 +48,8 @@ export function SindicatoForm({ sindicato, onClose, onSuccess }: SindicatoFormPr
     email: '',
     website: '',
     description: '',
-    active: true
+    active: true,
+    status: 'PENDING'
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -65,7 +67,8 @@ export function SindicatoForm({ sindicato, onClose, onSuccess }: SindicatoFormPr
         email: sindicato.email,
         website: sindicato.website || '',
         description: sindicato.description || '',
-        active: sindicato.active
+        active: sindicato.active,
+        status: sindicato.status || 'PENDING'
       })
     }
   }, [sindicato])
@@ -374,6 +377,20 @@ export function SindicatoForm({ sindicato, onClose, onSuccess }: SindicatoFormPr
                 />
                 <Label htmlFor="active">Sindicato ativo</Label>
               </div>
+              
+              {sindicato && formData.status && (
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    <strong>Status de Aprovação:</strong> {
+                      formData.status === 'APPROVED' ? 'Aprovado' :
+                      formData.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'
+                    }
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Apenas administradores FENAFAR podem alterar o status de aprovação
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Actions */}

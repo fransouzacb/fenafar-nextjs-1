@@ -36,7 +36,7 @@ const menuItems = [
   },
   {
     name: 'Sindicatos',
-    href: '/admin/sindicatos',
+    href: '/sindicatos',
     icon: Building2,
     roles: ['FENAFAR_ADMIN']
   },

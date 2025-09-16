@@ -48,6 +48,9 @@ model Sindicato {
   website     String?
   description String?
   active      Boolean  @default(true)
+  status      SindicatoStatus @default(PENDING)
+  approvedAt  DateTime?
+  approvedBy  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -103,6 +106,12 @@ enum UserRole {
   FENAFAR_ADMIN
   SINDICATO_ADMIN
   MEMBER
+}
+
+enum SindicatoStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum DocumentoTipo {
