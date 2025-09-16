@@ -52,14 +52,31 @@ function getRequiredRole(pathname: string): UserRole[] | null {
 function verifyToken(token: string): { userId: string; role: UserRole } | null {
   try {
     const payload = jwt.decode(token) as any
-    if (!payload || payload.exp < Date.now() / 1000) {
+    if (!payload) {
       return null
     }
+    
+    // Verificar se o token expirou
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      return null
+    }
+    
+    // Para tokens do Supabase, usar o user_id
+    const userId = payload.sub || payload.user_id
+    if (!userId) {
+      return null
+    }
+    
+    // Se não tiver role no token, assumir MEMBER por padrão
+    // A API /api/auth/me vai buscar o role correto do banco
+    const role = payload.role || UserRole.MEMBER
+    
     return {
-      userId: payload.sub,
-      role: payload.role as UserRole
+      userId,
+      role: role as UserRole
     }
   } catch (error) {
+    console.error('Erro ao verificar token:', error)
     return null
   }
 }

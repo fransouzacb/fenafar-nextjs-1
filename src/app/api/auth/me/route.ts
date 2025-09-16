@@ -16,14 +16,29 @@ export async function GET(request: NextRequest) {
     
     // Decodificar token
     const payload = jwt.decode(token) as any
-    if (!payload || payload.exp < Date.now() / 1000) {
+    if (!payload) {
       return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
+        { error: 'Token inválido' },
         { status: 401 }
       )
     }
 
-    const userId = payload.sub
+    // Verificar se o token expirou
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      return NextResponse.json(
+        { error: 'Token expirado' },
+        { status: 401 }
+      )
+    }
+
+    // Para tokens do Supabase, usar o user_id
+    const userId = payload.sub || payload.user_id
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'ID do usuário não encontrado no token' },
+        { status: 401 }
+      )
+    }
 
     // Buscar usuário no banco
     const user = await prisma.user.findUnique({
@@ -58,7 +73,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ user })
+    return NextResponse.json(user)
 
   } catch (error) {
     console.error('Erro ao buscar usuário:', error)

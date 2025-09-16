@@ -56,7 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (response.ok) {
           const userData = await response.json()
           setState({
-            user: userData.user,
+            user: userData,
             isLoading: false,
             isAuthenticated: true,
           })
@@ -109,7 +109,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (response.ok) {
           const userData = await response.json()
           setState({
-            user: userData.user,
+            user: userData,
             isLoading: false,
             isAuthenticated: true,
           })
