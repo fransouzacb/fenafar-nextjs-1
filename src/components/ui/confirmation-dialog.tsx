@@ -40,6 +40,7 @@ export function ConfirmationDialog({
         return {
           icon: XCircle,
           iconColor: 'text-red-600',
+          iconBg: 'bg-red-100',
           buttonVariant: 'destructive' as const,
           buttonText: 'Excluir'
         }
@@ -47,6 +48,7 @@ export function ConfirmationDialog({
         return {
           icon: CheckCircle,
           iconColor: 'text-green-600',
+          iconBg: 'bg-green-100',
           buttonVariant: 'default' as const,
           buttonText: 'Aprovar'
         }
@@ -54,6 +56,7 @@ export function ConfirmationDialog({
         return {
           icon: AlertTriangle,
           iconColor: 'text-yellow-600',
+          iconBg: 'bg-yellow-100',
           buttonVariant: 'default' as const,
           buttonText: confirmText
         }
@@ -65,27 +68,28 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white border border-gray-200 shadow-lg">
         <DialogHeader>
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-full bg-gray-100`}>
+          <div className="flex items-center space-x-4">
+            <div className={`p-3 rounded-full ${styles.iconBg} flex-shrink-0`}>
               <Icon className={`h-6 w-6 ${styles.iconColor}`} />
             </div>
-            <div>
-              <DialogTitle className="text-lg font-semibold">
+            <div className="flex-1">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
                 {title}
               </DialogTitle>
-              <DialogDescription className="text-sm text-gray-600">
+              <DialogDescription className="text-sm text-gray-600 mt-1">
                 {description}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
-        <DialogFooter className="flex space-x-2">
+        <DialogFooter className="flex space-x-3 mt-6">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             {cancelText}
           </Button>
@@ -93,6 +97,7 @@ export function ConfirmationDialog({
             variant={styles.buttonVariant}
             onClick={onConfirm}
             disabled={isLoading}
+            className={variant === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
           >
             {isLoading ? 'Processando...' : styles.buttonText}
           </Button>
