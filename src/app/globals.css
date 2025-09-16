@@ -98,33 +98,33 @@
   }
   
   .text-caption {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm text-gray-500;
   }
 
   /* FENAFAR Brand Classes */
   .fenafar-primary {
-    @apply bg-[hsl(var(--fenafar-primary))] text-[hsl(var(--fenafar-primary-foreground))];
+    @apply bg-blue-600 text-white hover:bg-blue-700;
   }
   
   .fenafar-secondary {
-    @apply bg-[hsl(var(--fenafar-secondary))] text-[hsl(var(--fenafar-secondary-foreground))];
+    @apply bg-gray-100 text-gray-900 hover:bg-gray-200;
   }
 
   /* Status Classes */
   .status-success {
-    @apply bg-[hsl(var(--fenafar-success))] text-[hsl(var(--fenafar-success-foreground))];
+    @apply bg-green-600 text-white;
   }
   
   .status-warning {
-    @apply bg-[hsl(var(--fenafar-warning))] text-[hsl(var(--fenafar-warning-foreground))];
+    @apply bg-yellow-500 text-white;
   }
   
   .status-error {
-    @apply bg-[hsl(var(--fenafar-error))] text-[hsl(var(--fenafar-error-foreground))];
+    @apply bg-red-600 text-white;
   }
   
   .status-info {
-    @apply bg-[hsl(var(--fenafar-info))] text-[hsl(var(--fenafar-info-foreground))];
+    @apply bg-blue-600 text-white;
   }
 }
 

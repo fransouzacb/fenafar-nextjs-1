@@ -14,6 +14,27 @@ interface LoginFormProps {
   onSuccess?: () => void
 }
 
+const testCredentials = [
+  {
+    name: 'Admin FENAFAR',
+    email: 'admin@fenafar.com.br',
+    password: 'admin123',
+    role: 'FENAFAR_ADMIN'
+  },
+  {
+    name: 'Admin Sindicato',
+    email: 'sindicato1@teste.com',
+    password: 'sindicato123',
+    role: 'SINDICATO_ADMIN'
+  },
+  {
+    name: 'Membro',
+    email: 'membro1@teste.com',
+    password: 'membro123',
+    role: 'MEMBER'
+  }
+]
+
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -51,6 +72,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       ...prev,
       [e.target.name]: e.target.value
     }))
+  }
+
+  const fillTestCredentials = (credential: typeof testCredentials[0]) => {
+    setFormData({
+      email: credential.email,
+      password: credential.password
+    })
+    toast.info(`Credenciais de ${credential.name} preenchidas`)
   }
 
   return (
@@ -104,14 +133,24 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Credenciais de teste:
-          </p>
-          <div className="mt-2 text-xs text-gray-500 space-y-1">
-            <p><strong>Admin FENAFAR:</strong> admin@fenafar.com.br / admin123</p>
-            <p><strong>Admin Sindicato:</strong> sindicato1@teste.com / sindicato123</p>
-            <p><strong>Membro:</strong> membro1@teste.com / membro123</p>
+        <div className="mt-6">
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-600 mb-3">
+              Credenciais de teste disponíveis:
+            </p>
+            <div className="space-y-2">
+              {testCredentials.map((credential, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials(credential)}
+                  className="w-full text-xs"
+                >
+                  {credential.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </CardContent>

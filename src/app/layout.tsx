@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   description: 'Sistema de gestão para sindicatos e membros da FENAFAR',
   keywords: ['FENAFAR', 'Sindicatos', 'Farmacêuticos', 'Gestão'],
   authors: [{ name: 'FENAFAR' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -28,11 +32,6 @@ export default function RootLayout({
             position="top-right"
             toastOptions={{
               duration: 4000,
-              style: {
-                background: 'hsl(var(--fenafar-card))',
-                color: 'hsl(var(--fenafar-card-foreground))',
-                border: '1px solid hsl(var(--fenafar-border))',
-              },
             }}
           />
         </ClientProviders>
