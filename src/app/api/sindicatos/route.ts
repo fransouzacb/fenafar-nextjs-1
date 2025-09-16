@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar sindicatos com contagem de membros
+    console.log('Buscando sindicatos para usuário:', userId)
     const sindicatos = await prisma.sindicato.findMany({
       include: {
         _count: {
@@ -76,6 +77,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log('Sindicatos encontrados:', sindicatos.length)
     return NextResponse.json(sindicatos)
 
   } catch (error) {

@@ -71,23 +71,31 @@ export default function SindicatosPage() {
       }
       
       const token = localStorage.getItem('access_token')
+      console.log('Token encontrado:', token ? 'Sim' : 'Não')
+      
       if (!token) {
         console.log('Token não encontrado, aguardando autenticação...')
         setIsLoading(false)
         return
       }
 
+      console.log('Fazendo requisição para /api/sindicatos...')
       const response = await fetch('/api/sindicatos', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
 
+      console.log('Resposta da API:', response.status, response.statusText)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Erro na resposta:', errorText)
         throw new Error('Erro ao carregar sindicatos')
       }
 
       const data = await response.json()
+      console.log('Dados recebidos:', data)
       setSindicatos(data)
     } catch (error) {
       console.error('Erro ao carregar sindicatos:', error)
