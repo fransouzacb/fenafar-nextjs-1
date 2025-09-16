@@ -84,17 +84,13 @@ function verifyToken(token: string): { userId: string; role: UserRole } | null {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  console.log('🔍 Middleware interceptando:', pathname)
-
   // Permitir rotas públicas
   if (isPublicRoute(pathname)) {
-    console.log('✅ Rota pública, permitindo:', pathname)
     return NextResponse.next()
   }
 
   // Permitir rotas protegidas pelo cliente (deixar o cliente fazer a verificação)
   if (isClientProtectedRoute(pathname)) {
-    console.log('✅ Rota protegida pelo cliente, permitindo:', pathname)
     return NextResponse.next()
   }
 
@@ -103,12 +99,7 @@ export function middleware(request: NextRequest) {
                 request.cookies.get('access_token')?.value ||
                 request.headers.get('x-access-token')
 
-  console.log('🔑 Token encontrado:', !!token)
-  console.log('📋 Headers authorization:', request.headers.get('authorization'))
-  console.log('🍪 Cookie access_token:', request.cookies.get('access_token')?.value)
-
   if (!token) {
-    console.log('❌ Nenhum token encontrado para:', pathname)
     // Redirecionar para login se não estiver autenticado
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
@@ -123,12 +114,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Verificar se o token é válido
-  console.log('🔍 Verificando token...')
   const tokenData = verifyToken(token)
-  console.log('📊 Dados do token:', tokenData)
-  
   if (!tokenData) {
-    console.log('❌ Token inválido para:', pathname)
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
@@ -143,11 +130,7 @@ export function middleware(request: NextRequest) {
 
   // Verificar permissões por role
   const requiredRoles = getRequiredRole(pathname)
-  console.log('🎭 Roles necessárias para', pathname, ':', requiredRoles)
-  console.log('👤 Role do usuário:', tokenData.role)
-  
   if (requiredRoles && !requiredRoles.includes(tokenData.role)) {
-    console.log('❌ Acesso negado - role insuficiente:', tokenData.role, 'não está em', requiredRoles)
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: 'Acesso negado. Permissões insuficientes.' },
