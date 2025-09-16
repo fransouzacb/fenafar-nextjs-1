@@ -28,7 +28,19 @@ export async function GET(request: NextRequest) {
     // Buscar usuário no banco
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailConfirmed: true,
+        active: true,
+        cpf: true,
+        cargo: true,
+        sindicatoId: true,
+        createdAt: true,
+        updatedAt: true,
         sindicato: {
           select: {
             id: true,
