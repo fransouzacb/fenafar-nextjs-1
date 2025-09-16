@@ -32,8 +32,8 @@ export function getAuthUser(request: NextRequest): AuthUser | null {
     return {
       id: userId,
       email: payload.email || '',
-      name: payload.name || '',
-      role: payload.role || UserRole.MEMBER,
+      name: payload.user_metadata?.name || payload.name || '',
+      role: payload.user_metadata?.role || payload.role || UserRole.MEMBER,
       active: payload.active !== false
     }
   } catch (error) {

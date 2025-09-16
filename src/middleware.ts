@@ -71,6 +71,10 @@ export function middleware(request: NextRequest) {
 
   // Obter usuário autenticado
   const user = getAuthUser(request)
+  
+  console.log('Middleware - Pathname:', pathname)
+  console.log('Middleware - User:', user)
+  console.log('Middleware - Cookies:', request.cookies.getAll())
 
   if (!user) {
     // Redirecionar para login se não estiver autenticado
