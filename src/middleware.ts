@@ -19,6 +19,7 @@ const clientProtectedRoutes = [
   '/admin',
   '/dashboard',
   '/sindicato',
+  '/api/auth/me', // Permitir que o cliente gerencie a autenticação
 ]
 
 // Rotas que precisam de roles específicas
@@ -29,7 +30,6 @@ const roleRoutes = {
   '/api/sindicatos': [UserRole.FENAFAR_ADMIN],
   '/api/convites': [UserRole.FENAFAR_ADMIN],
   '/api/stats': [UserRole.FENAFAR_ADMIN],
-  '/api/auth/me': [UserRole.FENAFAR_ADMIN, UserRole.SINDICATO_ADMIN, UserRole.MEMBER],
 }
 
 function isPublicRoute(pathname: string): boolean {
@@ -143,7 +143,11 @@ export function middleware(request: NextRequest) {
 
   // Verificar permissões por role
   const requiredRoles = getRequiredRole(pathname)
+  console.log('🎭 Roles necessárias para', pathname, ':', requiredRoles)
+  console.log('👤 Role do usuário:', tokenData.role)
+  
   if (requiredRoles && !requiredRoles.includes(tokenData.role)) {
+    console.log('❌ Acesso negado - role insuficiente:', tokenData.role, 'não está em', requiredRoles)
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: 'Acesso negado. Permissões insuficientes.' },
