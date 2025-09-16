@@ -19,8 +19,9 @@ export async function GET(request: NextRequest) {
       documentos,
       convites,
       sindicatosAtivos,
-      usersAtivos,
+      membrosAtivos,
       documentosRecentes,
+      membrosTotal
     ] = await Promise.all([
       // Total de usuários
       prisma.user.count(),
@@ -48,9 +49,10 @@ export async function GET(request: NextRequest) {
         }
       }),
       
-      // Usuários ativos
+      // Membros ativos (users com role MEMBER e active true)
       prisma.user.count({
         where: {
+          role: 'MEMBER',
           active: true
         }
       }),
@@ -63,17 +65,24 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
+
+      // Total de membros (users com role MEMBER)
+      prisma.user.count({
+        where: {
+          role: 'MEMBER'
+        }
+      })
     ])
 
     const stats = {
       users,
       sindicatos,
-      membros: users, // Por agora, usar usuários como membros
+      membros: membrosTotal,
       documentos,
       convites,
       sindicatosAtivos,
-      membrosAtivos: usersAtivos, // Usar usuários ativos
-      documentosPendentes: documentosRecentes, // Usar documentos recentes como "pendentes"
+      membrosAtivos,
+      documentosPendentes: documentosRecentes,
     }
 
     return NextResponse.json(stats)

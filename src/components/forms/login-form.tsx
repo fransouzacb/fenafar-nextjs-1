@@ -35,11 +35,34 @@ export function LoginForm() {
         return
       }
 
-      if (data.user) {
+      if (data.user && data.session) {
+        // Salvar dados no localStorage
+        localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('access_token', data.session.access_token)
+        
+        // Salvar token no cookie para middleware
+        document.cookie = `access_token=${data.session.access_token}; path=/; secure; samesite=strict`
+        
+        // Disparar evento para atualizar outros componentes
+        window.dispatchEvent(new CustomEvent('auth-change'))
+        
         success("Login realizado com sucesso!", "Bem-vindo ao sistema FENAFAR.")
         
         // Redirecionar baseado no role do usuário
-        router.push("/admin")
+        const role = data.user.user_metadata?.role || 'MEMBER'
+        switch (role) {
+          case 'FENAFAR_ADMIN':
+            router.push("/admin")
+            break
+          case 'SINDICATO_ADMIN':
+            router.push("/sindicato/dashboard")
+            break
+          case 'MEMBER':
+            router.push("/perfil")
+            break
+          default:
+            router.push("/perfil")
+        }
       }
     } catch {
       showError("Erro inesperado", "Ocorreu um erro inesperado. Tente novamente.")

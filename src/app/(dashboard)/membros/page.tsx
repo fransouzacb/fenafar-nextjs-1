@@ -79,15 +79,33 @@ export default function MembrosPage() {
         // Buscar membros
         const membrosResponse = await fetch('/api/membros')
         if (membrosResponse.ok) {
-          const membrosData = await membrosResponse.json()
-          setMembros(membrosData)
+          const membrosResult = await membrosResponse.json()
+          // Garantir que temos um array de membros
+          if (membrosResult.success && Array.isArray(membrosResult.membros)) {
+            setMembros(membrosResult.membros)
+          } else if (membrosResult.success && membrosResult.data && Array.isArray(membrosResult.data.membros)) {
+            setMembros(membrosResult.data.membros)
+          } else if (Array.isArray(membrosResult)) {
+            setMembros(membrosResult)
+          } else {
+            setMembros([])
+          }
         }
         
         // Buscar sindicatos
         const sindicatosResponse = await fetch('/api/sindicatos')
         if (sindicatosResponse.ok) {
-          const sindicatosData = await sindicatosResponse.json()
-          setSindicatos(sindicatosData)
+          const sindicatosResult = await sindicatosResponse.json()
+          // Garantir que temos um array, mesmo que a resposta tenha estrutura diferente
+          if (sindicatosResult.success && Array.isArray(sindicatosResult.sindicatos)) {
+            setSindicatos(sindicatosResult.sindicatos)
+          } else if (sindicatosResult.success && sindicatosResult.data && Array.isArray(sindicatosResult.data.sindicatos)) {
+            setSindicatos(sindicatosResult.data.sindicatos)
+          } else if (Array.isArray(sindicatosResult)) {
+            setSindicatos(sindicatosResult)
+          } else {
+            setSindicatos([])
+          }
         }
         
       } catch (error) {
@@ -388,7 +406,7 @@ export default function MembrosPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os Sindicatos</SelectItem>
-                  {sindicatos.map(sindicato => (
+                  {Array.isArray(sindicatos) && sindicatos.map(sindicato => (
                     <SelectItem key={sindicato.id} value={sindicato.id}>
                       {sindicato.name}
                     </SelectItem>

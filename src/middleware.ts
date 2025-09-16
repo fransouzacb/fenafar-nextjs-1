@@ -32,8 +32,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Verificar token de autenticação
-  const token = request.cookies.get('access_token')?.value
+  // Verificar token de autenticação (cookies primeiro, depois Authorization header)
+  let token = request.cookies.get('access_token')?.value
+  
+  if (!token) {
+    const authHeader = request.headers.get('authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    }
+  }
   
   if (!token) {
     // Redirecionar para login se não autenticado

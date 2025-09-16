@@ -1,54 +1,42 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { PlusCircle, Mail, CheckCircle2, XCircle, Clock } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { PlusCircle, Mail, CheckCircle2, XCircle, Clock, Loader2, AlertCircle, Trash2, Search, Filter } from 'lucide-react'
 
-// Mock data temporário
-const convitesData = [
-  {
-    id: '1',
-    nomeResponsavel: 'João Silva',
-    emailResponsavel: 'joao@sindicatofarmaceuticos.com.br',
-    nomeSindicato: 'Sindicato dos Farmacêuticos de São Paulo',
-    cnpj: '12.345.678/0001-00',
-    status: 'PENDENTE' as const,
-    criadoEm: '2024-01-15T10:30:00Z',
-    vence: '2024-01-22T10:30:00Z'
-  },
-  {
-    id: '2',
-    nomeResponsavel: 'Maria Santos',
-    emailResponsavel: 'maria@sindicatofarmarj.com.br',
-    nomeSindicato: 'Sindicato dos Farmacêuticos do Rio de Janeiro',
-    cnpj: '98.765.432/0001-00',
-    status: 'ACEITO' as const,
-    criadoEm: '2024-01-10T14:20:00Z',
-    vence: '2024-01-17T14:20:00Z'
-  },
-  {
-    id: '3',
-    nomeResponsavel: 'Carlos Oliveira',
-    emailResponsavel: 'carlos@sindicatomg.com.br',
-    nomeSindicato: 'Sindicato dos Farmacêuticos de Minas Gerais',
-    cnpj: '11.222.333/0001-44',
-    status: 'EXPIRADO' as const,
-    criadoEm: '2024-01-01T09:00:00Z',
-    vence: '2024-01-08T09:00:00Z'
+interface Convite {
+  id: string
+  email: string
+  role: string
+  createdAt: string
+  expiresAt: string
+  acceptedAt?: string
+  status: 'pendente' | 'aceito' | 'expirado'
+  criadoPor: {
+    id: string
+    name: string
+    email: string
   }
-]
-
-const stats = {
-  total: 15,
-  pendentes: 8,
-  aceitos: 5,
-  expirados: 2
 }
+
+interface ConvitesStats {
+  total: number
+  pendentes: number
+  aceitos: number
+  expirados: number
+}
+
+const ESTADOS_BRASIL = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 
+  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+]
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -62,9 +50,9 @@ function formatDate(dateString: string) {
 
 function getStatusIcon(status: string) {
   switch (status) {
-    case 'ACEITO':
+    case 'aceito':
       return <CheckCircle2 className="h-4 w-4" />
-    case 'EXPIRADO':
+    case 'expirado':
       return <XCircle className="h-4 w-4" />
     default:
       return <Clock className="h-4 w-4" />
@@ -73,9 +61,9 @@ function getStatusIcon(status: string) {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'ACEITO':
+    case 'aceito':
       return 'bg-green-100 text-green-800 border-green-200'
-    case 'EXPIRADO':
+    case 'expirado':
       return 'bg-red-100 text-red-800 border-red-200'
     default:
       return 'bg-yellow-100 text-yellow-800 border-yellow-200'
@@ -83,30 +71,172 @@ function getStatusColor(status: string) {
 }
 
 export default function ConvitesPage() {
+  const [convites, setConvites] = useState<Convite[]>([])
+  const [stats, setStats] = useState<ConvitesStats>({ total: 0, pendentes: 0, aceitos: 0, expirados: 0 })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('todos')
+
   const [formData, setFormData] = useState({
+    email: '',
     nomeResponsavel: '',
-    emailResponsavel: '',
     nomeSindicato: '',
-    cnpj: ''
+    cnpjSindicato: '',
+    cidadeSindicato: '',
+    estadoSindicato: '',
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  // Função para mostrar notificações
+  const showToast = (title: string, description: string, type: 'success' | 'error' = 'success') => {
+    const toastEl = document.createElement('div')
+    toastEl.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+      type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+    }`
+    toastEl.innerHTML = `
+      <div class="font-medium">${title}</div>
+      <div class="text-sm opacity-90">${description}</div>
+    `
+    document.body.appendChild(toastEl)
+    
+    setTimeout(() => {
+      document.body.removeChild(toastEl)
+    }, 5000)
+  }
+
+  // Carregar convites
+  const loadConvites = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const token = localStorage.getItem('access_token')
+      const params = new URLSearchParams()
+      if (searchTerm) params.append('search', searchTerm)
+      if (statusFilter && statusFilter !== 'todos') params.append('status', statusFilter)
+      
+      const response = await fetch(`/api/convites?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setConvites(result.data.convites)
+        
+        // Calcular estatísticas
+        const newStats = result.data.convites.reduce((acc: ConvitesStats, convite: Convite) => {
+          acc.total++
+          switch (convite.status) {
+            case 'aceito':
+              acc.aceitos++
+              break
+            case 'expirado':
+              acc.expirados++
+              break
+            default:
+              acc.pendentes++
+          }
+          return acc
+        }, { total: 0, pendentes: 0, aceitos: 0, expirados: 0 })
+        
+        setStats(newStats)
+      } else {
+        throw new Error(result.error || 'Erro ao carregar convites')
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido'
+      setError(errorMsg)
+      showToast('Erro', errorMsg, 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Carregar convites quando o componente monta ou filtros mudam
+  useEffect(() => {
+    loadConvites()
+  }, [searchTerm, statusFilter])
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+    
+    if (!formData.email) errors.email = 'Email é obrigatório'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Email inválido'
+    
+    if (!formData.nomeResponsavel) errors.nomeResponsavel = 'Nome é obrigatório'
+    if (!formData.nomeSindicato) errors.nomeSindicato = 'Nome do sindicato é obrigatório'
+    if (!formData.cnpjSindicato) errors.cnpjSindicato = 'CNPJ é obrigatório'
+    if (!formData.cidadeSindicato) errors.cidadeSindicato = 'Cidade é obrigatória'
+    if (!formData.estadoSindicato) errors.estadoSindicato = 'Estado é obrigatório'
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Enviando convite:', formData)
+    if (!validateForm()) {
+      showToast('Erro de validação', 'Por favor, corrija os erros no formulário', 'error')
+      return
+    }
+
+    setIsSubmitting(true)
     
-    // Simular requisição
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    alert('Convite enviado com sucesso!')
-    setIsDialogOpen(false)
-    setFormData({
-      nomeResponsavel: '',
-      emailResponsavel: '',
-      nomeSindicato: '',
-      cnpj: ''
-    })
+    try {
+      const token = localStorage.getItem('access_token')
+      const response = await fetch('/api/convites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        showToast('Sucesso!', result.message || 'Convite enviado com sucesso')
+        
+        // Resetar formulário
+        setFormData({
+          email: '',
+          nomeResponsavel: '',
+          nomeSindicato: '',
+          cnpjSindicato: '',
+          cidadeSindicato: '',
+          estadoSindicato: '',
+        })
+        setFormErrors({})
+        setIsDialogOpen(false)
+        
+        // Recarregar lista
+        await loadConvites()
+        
+        if (!result.data.email.sent) {
+          showToast('Atenção', 'Convite criado, mas houve problema no envio do email', 'error')
+        }
+      } else {
+        throw new Error(result.error || 'Erro ao enviar convite')
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido'
+      showToast('Erro', errorMsg, 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (field: string, value: string) => {
@@ -114,6 +244,14 @@ export default function ConvitesPage() {
       ...prev,
       [field]: value
     }))
+    
+    // Limpar erro do campo
+    if (formErrors[field]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }))
+    }
   }
 
   return (
@@ -133,6 +271,45 @@ export default function ConvitesPage() {
           <PlusCircle className="h-4 w-4" />
           Novo Convite
         </Button>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex gap-4 items-center">
+        <div className="flex-1 max-w-sm">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar por email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="pendente">Pendentes</SelectItem>
+            <SelectItem value="aceito">Aceitos</SelectItem>
+            <SelectItem value="expirado">Expirados</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        {(searchTerm || (statusFilter && statusFilter !== 'todos')) && (
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setSearchTerm('')
+              setStatusFilter('todos')
+            }}
+          >
+            Limpar Filtros
+          </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -192,12 +369,31 @@ export default function ConvitesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {convitesData.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Carregando convites...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+              <h3 className="mt-2 text-sm font-semibold text-red-800">Erro ao carregar</h3>
+              <p className="mt-1 text-sm text-red-600">{error}</p>
+              <div className="mt-6">
+                <Button onClick={loadConvites} variant="outline">
+                  Tentar Novamente
+                </Button>
+              </div>
+            </div>
+          ) : convites.length === 0 ? (
             <div className="text-center py-12">
               <Mail className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold">Nenhum convite encontrado</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Comece enviando um convite para um novo sindicato.
+                {searchTerm || statusFilter 
+                  ? "Nenhum convite encontrado com os filtros aplicados."
+                  : "Comece enviando um convite para um novo sindicato."
+                }
               </p>
               <div className="mt-6">
                 <Button onClick={() => setIsDialogOpen(true)}>
@@ -208,29 +404,30 @@ export default function ConvitesPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {convitesData.map((convite) => (
+              {convites.map((convite) => (
                 <div key={convite.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <h4 className="text-sm font-medium">{convite.nomeSindicato}</h4>
+                      <h4 className="text-sm font-medium">{convite.email}</h4>
                       <p className="text-sm text-muted-foreground">
-                        {convite.nomeResponsavel} • {convite.emailResponsavel}
+                        {convite.role} • Criado por {convite.criadoPor.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        CNPJ: {convite.cnpj}
+                        Email: {convite.criadoPor.email}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right text-xs text-muted-foreground">
-                        <div>Enviado: {formatDate(convite.criadoEm)}</div>
-                        <div>Expira: {formatDate(convite.vence)}</div>
+                        <div>Enviado: {formatDate(convite.createdAt)}</div>
+                        <div>Expira: {formatDate(convite.expiresAt)}</div>
+                        {convite.acceptedAt && <div>Aceito: {formatDate(convite.acceptedAt)}</div>}
                       </div>
                       <Badge 
                         variant="outline" 
                         className={`flex items-center gap-1 ${getStatusColor(convite.status)}`}
                       >
                         {getStatusIcon(convite.status)}
-                        {convite.status}
+                        {convite.status.toUpperCase()}
                       </Badge>
                     </div>
                   </div>
@@ -263,15 +460,19 @@ export default function ConvitesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="emailResponsavel">Email do Responsável</Label>
+                <Label htmlFor="email">Email do Responsável</Label>
                 <Input
-                  id="emailResponsavel"
+                  id="email"
                   type="email"
-                  value={formData.emailResponsavel}
-                  onChange={(e) => handleChange('emailResponsavel', e.target.value)}
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
                   placeholder="email@sindicato.com.br"
+                  className={formErrors.email ? 'border-red-500' : ''}
                   required
                 />
+                {formErrors.email && (
+                  <p className="text-sm text-red-600">{formErrors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="nomeSindicato">Nome do Sindicato</Label>
@@ -280,26 +481,84 @@ export default function ConvitesPage() {
                   value={formData.nomeSindicato}
                   onChange={(e) => handleChange('nomeSindicato', e.target.value)}
                   placeholder="Sindicato dos Farmacêuticos de..."
+                  className={formErrors.nomeSindicato ? 'border-red-500' : ''}
                   required
                 />
+                {formErrors.nomeSindicato && (
+                  <p className="text-sm text-red-600">{formErrors.nomeSindicato}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
+                <Label htmlFor="cnpjSindicato">CNPJ</Label>
                 <Input
-                  id="cnpj"
-                  value={formData.cnpj}
-                  onChange={(e) => handleChange('cnpj', e.target.value)}
+                  id="cnpjSindicato"
+                  value={formData.cnpjSindicato}
+                  onChange={(e) => handleChange('cnpjSindicato', e.target.value)}
                   placeholder="00.000.000/0000-00"
+                  className={formErrors.cnpjSindicato ? 'border-red-500' : ''}
                   required
                 />
+                {formErrors.cnpjSindicato && (
+                  <p className="text-sm text-red-600">{formErrors.cnpjSindicato}</p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cidadeSindicato">Cidade</Label>
+                  <Input
+                    id="cidadeSindicato"
+                    value={formData.cidadeSindicato}
+                    onChange={(e) => handleChange('cidadeSindicato', e.target.value)}
+                    placeholder="São Paulo"
+                    className={formErrors.cidadeSindicato ? 'border-red-500' : ''}
+                    required
+                  />
+                  {formErrors.cidadeSindicato && (
+                    <p className="text-sm text-red-600">{formErrors.cidadeSindicato}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="estadoSindicato">Estado</Label>
+                  <Select value={formData.estadoSindicato} onValueChange={(value) => handleChange('estadoSindicato', value)}>
+                    <SelectTrigger className={formErrors.estadoSindicato ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESTADOS_BRASIL.map((estado) => (
+                        <SelectItem key={estado} value={estado}>
+                          {estado}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formErrors.estadoSindicato && (
+                    <p className="text-sm text-red-600">{formErrors.estadoSindicato}</p>
+                  )}
+                </div>
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSubmitting}
+              >
                 Cancelar
               </Button>
-              <Button type="submit">
-                Enviar Convite
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="min-w-32"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  'Enviar Convite'
+                )}
               </Button>
             </DialogFooter>
           </form>

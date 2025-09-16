@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const ativo = searchParams.get("ativo")
     const cargo = searchParams.get("cargo")
     const sindicatoId = searchParams.get("sindicatoId")
-    const sortBy = searchParams.get("sortBy") || "nome"
+    const sortBy = searchParams.get("sortBy") || "name"
     const sortOrder = searchParams.get("sortOrder") || "asc"
 
     const skip = (page - 1) * limit
@@ -22,14 +22,14 @@ export async function GET(request: NextRequest) {
     
     if (search) {
       where.OR = [
-        { nome: { contains: search, mode: "insensitive" } },
+        { name: { contains: search, mode: "insensitive" } },
         { cpf: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } }
       ]
     }
     
     if (ativo !== null) {
-      where.ativo = ativo === "true"
+      where.active = ativo === "true"
     }
     
     if (cargo) {
@@ -54,7 +54,18 @@ export async function GET(request: NextRequest) {
         orderBy,
         skip,
         take: limit,
-        include: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          role: true,
+          emailConfirmed: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
+          cpf: true,
+          cargo: true,
           sindicato: {
             select: {
               id: true,
@@ -74,6 +85,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      membros,
       data: {
         membros,
         pagination: {

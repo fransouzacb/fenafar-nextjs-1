@@ -25,9 +25,13 @@ model User {
   cpf           String?   @unique
   cargo         String?
   
-  // Relacionamento com sindicato
-  sindicatoId   String?   @unique
-  sindicato     Sindicato? @relation("SindicatoAdmin", fields: [sindicatoId], references: [id])
+  // Relacionamento com sindicato (para admin - relacionamento 1:1)
+  adminOfSindicatoId String?   @unique
+  adminOfSindicato   Sindicato? @relation("SindicatoAdmin", fields: [adminOfSindicatoId], references: [id])
+  
+  // Relacionamento com sindicato (para membro - relacionamento N:1)
+  sindicatoId   String?
+  sindicato     Sindicato? @relation("SindicatoMembros", fields: [sindicatoId], references: [id])
   
   // Relacionamentos
   convites      Convite[] @relation("CriadoPor")
@@ -53,6 +57,7 @@ model Sindicato {
   
   // Relacionamentos
   admin       User?      @relation("SindicatoAdmin")
+  membros     User[]     @relation("SindicatoMembros")
   documentos  Documento[]
   convites    Convite[]
   
