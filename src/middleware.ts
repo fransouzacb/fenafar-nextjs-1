@@ -11,8 +11,6 @@ const publicRoutes = [
   '/redefinir-senha',
   '/api/auth/login',
   '/api/auth/register',
-  '/api/auth/me',
-  '/api/stats',
   '/api/convites/accept',
 ]
 
@@ -31,6 +29,7 @@ const roleRoutes = {
   '/api/sindicatos': [UserRole.FENAFAR_ADMIN],
   '/api/convites': [UserRole.FENAFAR_ADMIN],
   '/api/stats': [UserRole.FENAFAR_ADMIN],
+  '/api/auth/me': [UserRole.FENAFAR_ADMIN, UserRole.SINDICATO_ADMIN, UserRole.MEMBER],
 }
 
 function isPublicRoute(pathname: string): boolean {
