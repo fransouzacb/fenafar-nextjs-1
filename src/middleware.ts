@@ -27,6 +27,7 @@ const roleRoutes = {
   '/admin': [UserRole.FENAFAR_ADMIN],
   '/dashboard': [UserRole.FENAFAR_ADMIN, UserRole.SINDICATO_ADMIN],
   '/sindicato': [UserRole.SINDICATO_ADMIN, UserRole.MEMBER],
+  '/sindicatos': [UserRole.FENAFAR_ADMIN],
   '/api/sindicatos': [UserRole.FENAFAR_ADMIN],
   '/api/convites': [UserRole.FENAFAR_ADMIN],
   '/api/stats': [UserRole.FENAFAR_ADMIN],
