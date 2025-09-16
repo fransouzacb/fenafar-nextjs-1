@@ -30,13 +30,16 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    loadStats()
-  }, [])
+    // Só carregar stats se o usuário estiver autenticado
+    if (user && !authLoading) {
+      loadStats()
+    }
+  }, [user, authLoading])
 
   const loadStats = async () => {
     try {
@@ -47,7 +50,9 @@ export default function AdminDashboard() {
       
       const token = localStorage.getItem('access_token')
       if (!token) {
-        throw new Error('Token não encontrado')
+        console.log('Token não encontrado, aguardando autenticação...')
+        setIsLoading(false)
+        return
       }
 
       const response = await fetch('/api/stats', {
@@ -70,10 +75,23 @@ export default function AdminDashboard() {
     }
   }
 
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Carregando usuário...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-500">Usuário não encontrado</p>
+        </div>
       </div>
     )
   }
