@@ -43,9 +43,22 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Decodificar token (implementação básica - em produção usar JWT verify)
-    const userData = JSON.parse(atob(token.split('.')[1]))
-    const userRole = userData.user_metadata?.role || 'MEMBER'
+    // Verificar se o token é válido (JWT do Supabase)
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      throw new Error('Token inválido')
+    }
+    
+    // Decodificar payload do JWT
+    const payload = JSON.parse(atob(parts[1]))
+    
+    // Verificar se o token não expirou
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      throw new Error('Token expirado')
+    }
+    
+    // Obter role do user_metadata (Supabase)
+    const userRole = payload.user_metadata?.role || 'MEMBER'
     
     // Verificar permissões baseadas em role
     for (const [route, allowedRoles] of Object.entries(roleBasedRoutes)) {
@@ -62,7 +75,7 @@ export async function middleware(request: NextRequest) {
     // Adicionar headers com informações do usuário para as páginas
     const response = NextResponse.next()
     response.headers.set('x-user-role', userRole)
-    response.headers.set('x-user-id', userData.sub)
+    response.headers.set('x-user-id', payload.sub || payload.user_id)
     
     return response
     
@@ -70,7 +83,10 @@ export async function middleware(request: NextRequest) {
     console.error('Erro no middleware:', error)
     // Token inválido, redirecionar para login
     const loginUrl = new URL('/login', request.url)
-    return NextResponse.redirect(loginUrl)
+    // Remover cookie inválido
+    const response = NextResponse.redirect(loginUrl)
+    response.cookies.delete('access_token')
+    return response
   }
 }
 

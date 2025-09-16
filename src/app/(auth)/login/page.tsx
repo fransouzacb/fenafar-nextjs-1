@@ -46,22 +46,18 @@ export default function LoginPage() {
         localStorage.setItem('user', JSON.stringify(data.user))
         localStorage.setItem('access_token', data.access_token)
         
-        // Definir cookie para o middleware
-        document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`
+        // Definir cookie para o middleware usando o token do Supabase
+        document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax; Secure=${location.protocol === 'https:'}`
         
         // Disparar evento customizado para atualizar o useAuth
         window.dispatchEvent(new CustomEvent('auth-change'))
         
-        // Aguardar um pouco para o estado atualizar
-        setTimeout(() => {
-          // Redirecionar baseado no role do usuário
-          const role = data.user.user_metadata?.role || 'MEMBER'
-          if (role === 'FENAFAR_ADMIN') {
-            router.push("/admin")
-          } else {
-            router.push("/sindicato")
-          }
-        }, 100)
+        // Redirecionar baseado no role do usuário COM RELOAD da página
+        const role = data.user.user_metadata?.role || 'MEMBER'
+        const targetUrl = role === 'FENAFAR_ADMIN' ? "/admin" : "/sindicato/dashboard"
+        
+        // Forçar reload para garantir que o middleware funcione
+        window.location.href = targetUrl
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro inesperado. Tente novamente."
