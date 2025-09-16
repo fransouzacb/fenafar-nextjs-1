@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
 import { SindicatoForm } from '@/components/forms/sindicato-form'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface Sindicato {
   id: string
@@ -56,6 +57,16 @@ export default function SindicatosPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingSindicato, setEditingSindicato] = useState<Sindicato | null>(null)
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    open: boolean
+    type: 'delete' | 'approve' | 'reject' | null
+    sindicato: Sindicato | null
+  }>({
+    open: false,
+    type: null,
+    sindicato: null
+  })
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -85,68 +96,74 @@ export default function SindicatosPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este sindicato?')) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/sindicatos/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao excluir sindicato')
-      }
-
-      toast.success('Sindicato excluído com sucesso!')
-      loadSindicatos()
-    } catch (error) {
-      console.error('Erro ao excluir sindicato:', error)
-      toast.error('Erro ao excluir sindicato')
-    }
+  const openConfirmationDialog = (type: 'delete' | 'approve' | 'reject', sindicato: Sindicato) => {
+    setConfirmationDialog({
+      open: true,
+      type,
+      sindicato
+    })
   }
 
-  const handleApprove = async (id: string) => {
-    try {
-      const response = await fetch(`/api/sindicatos/${id}/approve`, {
-        method: 'POST',
-        credentials: 'include'
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao aprovar sindicato')
-      }
-
-      toast.success('Sindicato aprovado com sucesso!')
-      loadSindicatos()
-    } catch (error) {
-      console.error('Erro ao aprovar sindicato:', error)
-      toast.error('Erro ao aprovar sindicato')
-    }
+  const closeConfirmationDialog = () => {
+    setConfirmationDialog({
+      open: false,
+      type: null,
+      sindicato: null
+    })
   }
 
-  const handleReject = async (id: string) => {
-    if (!confirm('Tem certeza que deseja rejeitar este sindicato?')) {
-      return
-    }
+  const handleConfirmAction = async () => {
+    if (!confirmationDialog.sindicato || !confirmationDialog.type) return
+
+    setIsProcessing(true)
+    const { sindicato, type } = confirmationDialog
 
     try {
-      const response = await fetch(`/api/sindicatos/${id}/reject`, {
-        method: 'POST',
-        credentials: 'include'
-      })
+      let response: Response
+      let successMessage: string
 
-      if (!response.ok) {
-        throw new Error('Erro ao rejeitar sindicato')
+      switch (type) {
+        case 'delete':
+          response = await fetch(`/api/sindicatos/${sindicato.id}`, {
+            method: 'DELETE',
+            credentials: 'include'
+          })
+          successMessage = 'Sindicato excluído com sucesso!'
+          break
+
+        case 'approve':
+          response = await fetch(`/api/sindicatos/${sindicato.id}/approve`, {
+            method: 'POST',
+            credentials: 'include'
+          })
+          successMessage = 'Sindicato aprovado com sucesso!'
+          break
+
+        case 'reject':
+          response = await fetch(`/api/sindicatos/${sindicato.id}/reject`, {
+            method: 'POST',
+            credentials: 'include'
+          })
+          successMessage = 'Sindicato rejeitado com sucesso!'
+          break
+
+        default:
+          throw new Error('Ação inválida')
       }
 
-      toast.success('Sindicato rejeitado com sucesso!')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro na operação')
+      }
+
+      toast.success(successMessage)
       loadSindicatos()
-    } catch (error) {
-      console.error('Erro ao rejeitar sindicato:', error)
-      toast.error('Erro ao rejeitar sindicato')
+      closeConfirmationDialog()
+    } catch (error: any) {
+      console.error(`Erro ao ${type} sindicato:`, error)
+      toast.error(error.message || `Erro ao ${type} sindicato`)
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -378,7 +395,7 @@ export default function SindicatosPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleApprove(sindicato.id)}
+                          onClick={() => openConfirmationDialog('approve', sindicato)}
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                         >
                           <CheckCircle className="h-4 w-4" />
@@ -386,7 +403,7 @@ export default function SindicatosPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleReject(sindicato.id)}
+                          onClick={() => openConfirmationDialog('reject', sindicato)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <XCircle className="h-4 w-4" />
@@ -403,7 +420,7 @@ export default function SindicatosPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(sindicato.id)}
+                      onClick={() => openConfirmationDialog('delete', sindicato)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -459,6 +476,35 @@ export default function SindicatosPage() {
           }}
         />
       )}
+
+      {/* Dialog de Confirmação */}
+      <ConfirmationDialog
+        open={confirmationDialog.open}
+        onOpenChange={closeConfirmationDialog}
+        onConfirm={handleConfirmAction}
+        title={
+          confirmationDialog.type === 'delete' 
+            ? 'Excluir Sindicato' 
+            : confirmationDialog.type === 'approve'
+            ? 'Aprovar Sindicato'
+            : 'Rejeitar Sindicato'
+        }
+        description={
+          confirmationDialog.type === 'delete'
+            ? `Tem certeza que deseja excluir o sindicato "${confirmationDialog.sindicato?.name}"? Esta ação não pode ser desfeita.`
+            : confirmationDialog.type === 'approve'
+            ? `Tem certeza que deseja aprovar o sindicato "${confirmationDialog.sindicato?.name}"?`
+            : `Tem certeza que deseja rejeitar o sindicato "${confirmationDialog.sindicato?.name}"?`
+        }
+        variant={
+          confirmationDialog.type === 'delete' 
+            ? 'danger' 
+            : confirmationDialog.type === 'approve'
+            ? 'success'
+            : 'danger'
+        }
+        isLoading={isProcessing}
+      />
     </div>
   )
 }

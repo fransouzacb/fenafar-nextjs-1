@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
+import { getAuthUser, hasRole } from '@/lib/auth'
 
 // POST /api/sindicatos/[id]/reject - Rejeitar sindicato
 export async function POST(
@@ -8,69 +9,32 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization || !authorization.startsWith('Bearer ')) {
+    // Verificar autenticação
+    const user = getAuthUser(request)
+    
+    if (!user) {
       return NextResponse.json(
         { error: 'Token de autorização necessário' },
         { status: 401 }
       )
     }
 
-    const token = authorization.replace('Bearer ', '')
-    
-    // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
-    const payload = jwt.decode(token) as any
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      )
-    }
-
-    // Verificar se o token expirou
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return NextResponse.json(
-        { error: 'Token expirado' },
-        { status: 401 }
-      )
-    }
-
-    // Buscar usuário no banco para verificar role
-    const userId = payload.sub || payload.user_id
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'ID do usuário não encontrado no token' },
-        { status: 401 }
-      )
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true }
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      )
-    }
-
     // Apenas FENAFAR_ADMIN pode rejeitar sindicatos
-    if (user.role !== UserRole.FENAFAR_ADMIN) {
+    if (!hasRole(user, [UserRole.FENAFAR_ADMIN])) {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas administradores FENAFAR podem rejeitar sindicatos.' },
         { status: 403 }
       )
     }
 
-    // Verificar se sindicato existe
-    const existingSindicato = await prisma.sindicato.findUnique({
-      where: { id: params.id }
+    const { id } = params
+
+    // Verificar se o sindicato existe
+    const sindicato = await prisma.sindicato.findUnique({
+      where: { id }
     })
 
-    if (!existingSindicato) {
+    if (!sindicato) {
       return NextResponse.json(
         { error: 'Sindicato não encontrado' },
         { status: 404 }
@@ -78,12 +42,12 @@ export async function POST(
     }
 
     // Rejeitar sindicato
-    const sindicato = await prisma.sindicato.update({
-      where: { id: params.id },
+    const updatedSindicato = await prisma.sindicato.update({
+      where: { id },
       data: {
         status: 'REJECTED',
         approvedAt: new Date(),
-        approvedBy: userId
+        approvedBy: user.id
       },
       include: {
         _count: {
@@ -94,7 +58,7 @@ export async function POST(
       }
     })
 
-    return NextResponse.json(sindicato)
+    return NextResponse.json(updatedSindicato)
 
   } catch (error) {
     console.error('Erro ao rejeitar sindicato:', error)
