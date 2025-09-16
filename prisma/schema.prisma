@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  phone         String?
+  role          UserRole  @default(MEMBER)
+  emailConfirmed Boolean  @default(false)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Dados específicos do membro (se necessário)
+  cpf           String?   @unique
+  cargo         String?
+  
+  // Relacionamento com sindicato
+  sindicatoId   String?   @unique
+  sindicato     Sindicato? @relation("SindicatoAdmin", fields: [sindicatoId], references: [id])
+  
+  // Relacionamentos
+  convites      Convite[] @relation("CriadoPor")
+  
+  @@map("users")
+}
+
+model Sindicato {
+  id          String   @id @default(uuid())
+  name        String
+  cnpj        String   @unique
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  phone       String?
+  email       String
+  website     String?
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relacionamentos
+  admin       User?      @relation("SindicatoAdmin")
+  documentos  Documento[]
+  convites    Convite[]
+  
+  @@map("sindicatos")
+}
+
+
+model Documento {
+  id          String        @id @default(uuid())
+  name        String
+  tipo        DocumentoTipo
+  description String?
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  sindicatoId String
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relacionamentos
+  sindicato   Sindicato @relation(fields: [sindicatoId], references: [id])
+  
+  @@map("documentos")
+}
+
+model Convite {
+  id          String    @id @default(uuid())
+  email       String
+  role        UserRole
+  sindicatoId String?
+  invitedBy   String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relacionamentos
+  sindicato   Sindicato? @relation(fields: [sindicatoId], references: [id])
+  criadoPor   User       @relation("CriadoPor", fields: [invitedBy], references: [id])
+  
+  @@map("convites")
+}
+
+// Enums
+enum UserRole {
+  FENAFAR_ADMIN
+  SINDICATO_ADMIN
+  MEMBER
+}
+
+enum DocumentoTipo {
+  CCT
+  ACT
+  AVATAR
+  OUTRO
+}
