@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-white text-gray-900;
+  }
+}
+
+@layer components {
+  /* Notificações com fundo claro e texto escuro */
+  [data-sonner-toast] {
+    background: hsl(0, 0%, 100%) !important;
+    color: hsl(0, 0%, 9%) !important;
+    border: 1px solid hsl(0, 0%, 89%) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  [data-sonner-toast][data-type="success"] {
+    background: hsl(142, 76%, 95%) !important;
+    color: hsl(142, 76%, 25%) !important;
+    border-color: hsl(142, 76%, 80%) !important;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    background: hsl(0, 84%, 95%) !important;
+    color: hsl(0, 84%, 25%) !important;
+    border-color: hsl(0, 84%, 80%) !important;
+  }
+
+  [data-sonner-toast][data-type="warning"] {
+    background: hsl(38, 92%, 95%) !important;
+    color: hsl(38, 92%, 25%) !important;
+    border-color: hsl(38, 92%, 80%) !important;
+  }
+
+  [data-sonner-toast][data-type="info"] {
+    background: hsl(221, 83%, 95%) !important;
+    color: hsl(221, 83%, 25%) !important;
+    border-color: hsl(221, 83%, 80%) !important;
+  }
+
+  [data-sonner-toast] [data-description] {
+    color: inherit !important;
+    opacity: 0.8 !important;
+  }
+
+  [data-sonner-toast] [data-title] {
+    font-weight: 600 !important;
+    color: inherit !important;
+  }
+
+  [data-sonner-toast] [data-close-button] {
+    color: inherit !important;
+    opacity: 0.7 !important;
+  }
+
+  [data-sonner-toast] [data-close-button]:hover {
+    opacity: 1 !important;
+  }
+
+  /* Melhorar contraste dos diálogos de confirmação */
+  [data-radix-dialog-content] {
+    background: hsl(0, 0%, 100%) !important;
+    color: hsl(0, 0%, 9%) !important;
+    border: 1px solid hsl(0, 0%, 89%) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  [data-radix-dialog-title] {
+    color: hsl(0, 0%, 9%) !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+  }
+
+  [data-radix-dialog-description] {
+    color: hsl(0, 0%, 45%) !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+
+  [data-radix-dialog-close] {
+    color: hsl(0, 0%, 45%) !important;
+  }
+
+  [data-radix-dialog-close]:hover {
+    color: hsl(0, 0%, 9%) !important;
+  }
+
+  /* Botões do diálogo */
+  [data-radix-dialog-content] button[data-slot="alert-dialog-cancel"] {
+    background: hsl(0, 0%, 98%) !important;
+    color: hsl(0, 0%, 9%) !important;
+    border: 1px solid hsl(0, 0%, 89%) !important;
+  }
+
+  [data-radix-dialog-content] button[data-slot="alert-dialog-cancel"]:hover {
+    background: hsl(0, 0%, 96%) !important;
+  }
+
+  [data-radix-dialog-content] button[data-slot="alert-dialog-action"] {
+    background: hsl(0, 84%, 60%) !important;
+    color: hsl(0, 0%, 100%) !important;
+    border: 1px solid hsl(0, 84%, 50%) !important;
+  }
+
+  [data-radix-dialog-content] button[data-slot="alert-dialog-action"]:hover {
+    background: hsl(0, 84%, 50%) !important;
+  }
+
+  /* Estilos específicos para AlertDialog do Chadcn/ui */
+  [data-slot="alert-dialog-content"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    color: hsl(0, 0%, 9%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  [data-slot="alert-dialog-title"] {
+    color: hsl(0, 0%, 9%) !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+  }
+
+  [data-slot="alert-dialog-description"] {
+    color: hsl(0, 0%, 45%) !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Botões específicos do AlertDialog */
+  [data-slot="alert-dialog-content"] button {
+    background: rgba(248, 250, 252, 0.9) !important;
+    color: hsl(0, 0%, 9%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(5px) !important;
+  }
+
+  [data-slot="alert-dialog-content"] button:hover {
+    background: rgba(241, 245, 249, 0.9) !important;
+    color: hsl(0, 0%, 9%) !important;
+  }
+
+  [data-slot="alert-dialog-content"] button:focus {
+    outline: 2px solid hsl(0, 0%, 9%) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Botão de confirmação específico (último botão) */
+  [data-slot="alert-dialog-content"] button:last-child {
+    background: rgba(239, 68, 68, 0.9) !important;
+    color: hsl(0, 0%, 100%) !important;
+    border: 1px solid rgba(220, 38, 38, 0.8) !important;
+    backdrop-filter: blur(5px) !important;
+  }
+
+  [data-slot="alert-dialog-content"] button:last-child:hover {
+    background: rgba(220, 38, 38, 0.9) !important;
+    color: hsl(0, 0%, 100%) !important;
+  }
+
+  [data-slot="alert-dialog-content"] button:last-child:focus {
+    outline: 2px solid rgba(239, 68, 68, 0.8) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Dark mode para diálogos */
+  @media (prefers-color-scheme: dark) {
+    [data-radix-dialog-content] {
+      background: hsl(0, 0%, 9%) !important;
+      color: hsl(0, 0%, 98%) !important;
+      border-color: hsl(0, 0%, 20%) !important;
+    }
+
+    [data-radix-dialog-title] {
+      color: hsl(0, 0%, 98%) !important;
+    }
+
+    [data-radix-dialog-description] {
+      color: hsl(0, 0%, 70%) !important;
+    }
+
+    [data-radix-dialog-close] {
+      color: hsl(0, 0%, 70%) !important;
+    }
+
+    [data-radix-dialog-close]:hover {
+      color: hsl(0, 0%, 98%) !important;
+    }
+
+    [data-radix-dialog-content] button[data-slot="alert-dialog-cancel"] {
+      background: hsl(0, 0%, 20%) !important;
+      color: hsl(0, 0%, 98%) !important;
+      border-color: hsl(0, 0%, 30%) !important;
+    }
+
+    [data-radix-dialog-content] button[data-slot="alert-dialog-cancel"]:hover {
+      background: hsl(0, 0%, 30%) !important;
+    }
+
+    /* Dark mode para AlertDialog */
+    [data-slot="alert-dialog-content"] {
+      background: rgba(15, 23, 42, 0.95) !important;
+      backdrop-filter: blur(10px) !important;
+      color: hsl(0, 0%, 98%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    [data-slot="alert-dialog-title"] {
+      color: hsl(0, 0%, 98%) !important;
+    }
+
+    [data-slot="alert-dialog-description"] {
+      color: hsl(0, 0%, 70%) !important;
+    }
+
+    [data-slot="alert-dialog-content"] button {
+      background: rgba(30, 41, 59, 0.9) !important;
+      color: hsl(0, 0%, 98%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(5px) !important;
+    }
+
+    [data-slot="alert-dialog-content"] button:hover {
+      background: rgba(51, 65, 85, 0.9) !important;
+      color: hsl(0, 0%, 98%) !important;
+    }
+
+    [data-slot="alert-dialog-content"] button:last-child {
+      background: rgba(239, 68, 68, 0.9) !important;
+      color: hsl(0, 0%, 100%) !important;
+      border: 1px solid rgba(220, 38, 38, 0.8) !important;
+      backdrop-filter: blur(5px) !important;
+    }
+
+    [data-slot="alert-dialog-content"] button:last-child:hover {
+      background: rgba(220, 38, 38, 0.9) !important;
+      color: hsl(0, 0%, 100%) !important;
+    }
+  }
+}

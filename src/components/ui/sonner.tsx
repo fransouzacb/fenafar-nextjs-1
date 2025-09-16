@@ -1,7 +1,9 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import { Toaster as Sonner } from "sonner"
+
+type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
@@ -11,22 +13,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
-        duration: 4000,
-        style: {
-          fontSize: '14px',
-          fontWeight: '500',
-        },
         classNames: {
-          toast: 'group toast',
-          description: 'text-sm opacity-90',
-          actionButton: 'bg-white/20 hover:bg-white/30 text-white font-medium',
-          cancelButton: 'bg-white/10 hover:bg-white/20 text-white font-medium',
+          toast:
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
       }}
-      position="top-right"
-      expand={true}
-      richColors={false}
-      closeButton={true}
       {...props}
     />
   )

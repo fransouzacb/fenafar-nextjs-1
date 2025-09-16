@@ -1,4 +1,4 @@
-# 🤖 Copilot Instructions - Sistema FENAFAR
+npm run dev# 🤖 Copilot Instructions - Sistema FENAFAR
 
 ## 📋 Visão Geral do Projeto
 

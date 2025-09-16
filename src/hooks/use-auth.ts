@@ -1,137 +1,226 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { supabase } from '@/lib/supabase'
+import { prisma } from '@/lib/prisma'
+import { AuthUser, AuthState, AuthContextType, LoginRequest, RegisterRequest, TokenPayload } from '@/types/auth'
+import { UserRole } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 
-interface User {
-  id: string
-  email: string
-  user_metadata: {
-    role: string
-    name?: string
-  }
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+interface AuthProviderProps {
+  children: ReactNode
 }
 
-interface AuthState {
-  user: User | null
-  loading: boolean
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
+    isAuthenticated: false,
+  })
+
+  // Verificar token no localStorage
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          setState({ user: null, isLoading: false, isAuthenticated: false })
+          return
+        }
+
+        // Verificar se o token é válido
+        const payload = jwt.decode(token) as TokenPayload
+        if (!payload || payload.exp < Date.now() / 1000) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          setState({ user: null, isLoading: false, isAuthenticated: false })
+          return
+        }
+
+        // Buscar usuário no banco
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (response.ok) {
+          const userData = await response.json()
+          setState({
+            user: userData.user,
+            isLoading: false,
+            isAuthenticated: true,
+          })
+        } else {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          setState({ user: null, isLoading: false, isAuthenticated: false })
+        }
+      } catch (error) {
+        console.error('Erro na inicialização da autenticação:', error)
+        setState({ user: null, isLoading: false, isAuthenticated: false })
+      }
+    }
+
+    initAuth()
+  }, [])
+
+  const login = async (credentials: LoginRequest) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }))
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      })
+
+      if (error) throw error
+
+      if (data.session) {
+        const token = data.session.access_token
+        const refreshToken = data.session.refresh_token
+
+        // Salvar tokens
+        localStorage.setItem('access_token', token)
+        localStorage.setItem('refresh_token', refreshToken)
+
+        // Buscar dados do usuário
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (response.ok) {
+          const userData = await response.json()
+          setState({
+            user: userData.user,
+            isLoading: false,
+            isAuthenticated: true,
+          })
+        } else {
+          throw new Error('Erro ao buscar dados do usuário')
+        }
+      }
+    } catch (error) {
+      setState(prev => ({ ...prev, isLoading: false }))
+      throw error
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut()
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+      })
+    } catch (error) {
+      console.error('Erro no logout:', error)
+    }
+  }
+
+  const register = async (data: RegisterRequest) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }))
+
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+            phone: data.phone,
+            cpf: data.cpf,
+            cargo: data.cargo,
+          }
+        }
+      })
+
+      if (error) throw error
+
+      setState(prev => ({ ...prev, isLoading: false }))
+    } catch (error) {
+      setState(prev => ({ ...prev, isLoading: false }))
+      throw error
+    }
+  }
+
+  const refreshToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) throw new Error('Refresh token não encontrado')
+
+      const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: refreshToken
+      })
+
+      if (error) throw error
+
+      if (data.session) {
+        localStorage.setItem('access_token', data.session.access_token)
+        localStorage.setItem('refresh_token', data.session.refresh_token)
+        return data.session.access_token
+      }
+    } catch (error) {
+      console.error('Erro ao renovar token:', error)
+      await logout()
+      throw error
+    }
+  }
+
+  const updateProfile = async (data: Partial<AuthUser>) => {
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) throw new Error('Token não encontrado')
+
+      const response = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) throw new Error('Erro ao atualizar perfil')
+
+      const updatedUser = await response.json()
+      setState(prev => ({
+        ...prev,
+        user: updatedUser.user
+      }))
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error)
+      throw error
+    }
+  }
+
+  const value: AuthContextType = {
+    ...state,
+    login,
+    logout,
+    register,
+    refreshToken,
+    updateProfile,
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    loading: true,
-  })
-
-  useEffect(() => {
-    // Verificar se há usuário no localStorage
-    const checkAuth = () => {
-      try {
-        const userStr = localStorage.getItem('user')
-        const token = localStorage.getItem('access_token')
-        
-        if (userStr && token) {
-          const user = JSON.parse(userStr)
-          setAuthState({
-            user,
-            loading: false,
-          })
-        } else {
-          setAuthState({
-            user: null,
-            loading: false,
-          })
-        }
-      } catch (error) {
-        console.error('Erro ao verificar autenticação:', error)
-        setAuthState({
-          user: null,
-          loading: false,
-        })
-      }
-    }
-
-    // Verificar imediatamente
-    checkAuth()
-
-    // Escutar mudanças no localStorage (incluindo do mesmo tab)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'user' || e.key === 'access_token') {
-        checkAuth()
-      }
-    }
-
-    // Escutar mudanças customizadas (do mesmo tab)
-    const handleCustomStorageChange = () => {
-      checkAuth()
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('auth-change', handleCustomStorageChange)
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('auth-change', handleCustomStorageChange)
-    }
-  }, [])
-
-  const signOut = async () => {
-    localStorage.removeItem('user')
-    localStorage.removeItem('access_token')
-    
-    // Remover cookie também
-    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-    
-    setAuthState({
-      user: null,
-      loading: false,
-    })
-    // Disparar evento para atualizar outros componentes
-    window.dispatchEvent(new CustomEvent('auth-change'))
-    
-    // Redirecionar para login
-    window.location.href = '/login'
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider')
   }
-
-  const getUserRole = (): string | null => {
-    return authState.user?.user_metadata?.role || null
-  }
-
-  const isAdmin = (): boolean => {
-    const role = getUserRole()
-    return role === "FENAFAR_ADMIN"
-  }
-
-  const isSindicatoAdmin = (): boolean => {
-    const role = getUserRole()
-    return role === "SINDICATO_ADMIN"
-  }
-
-  const isMember = (): boolean => {
-    const role = getUserRole()
-    return role === "MEMBER"
-  }
-
-  const redirectBasedOnRole = (): string => {
-    const role = getUserRole()
-    switch (role) {
-      case 'FENAFAR_ADMIN':
-        return '/admin'
-      case 'SINDICATO_ADMIN':
-        return '/sindicato/dashboard'
-      case 'MEMBER':
-        return '/perfil'
-      default:
-        return '/perfil'
-    }
-  }
-
-  return {
-    ...authState,
-    signOut,
-    getUserRole,
-    isAdmin,
-    isSindicatoAdmin,
-    isMember,
-    redirectBasedOnRole,
-  }
+  return context
 }

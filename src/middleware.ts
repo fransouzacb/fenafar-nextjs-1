@@ -1,113 +1,123 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
+import { UserRole } from '@prisma/client'
 
 // Rotas que não precisam de autenticação
 const publicRoutes = [
-  '/',
   '/login',
-  '/register', 
+  '/register',
   '/recuperar-senha',
   '/redefinir-senha',
-  '/convites/aceitar'
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/convites/accept',
 ]
 
-// Rotas protegidas por role
-const roleBasedRoutes = {
-  '/admin': ['FENAFAR_ADMIN'],
-  '/dashboard': ['FENAFAR_ADMIN'],
-  '/sindicatos': ['FENAFAR_ADMIN'],
-  '/membros': ['FENAFAR_ADMIN'],
-  '/documentos': ['FENAFAR_ADMIN'],
-  '/convites': ['FENAFAR_ADMIN'],
-  '/configuracoes': ['FENAFAR_ADMIN'],
-  '/sindicato': ['SINDICATO_ADMIN', 'MEMBER'],
-  '/perfil': ['SINDICATO_ADMIN', 'MEMBER']
+// Rotas que precisam de roles específicas
+const roleRoutes = {
+  '/admin': [UserRole.FENAFAR_ADMIN],
+  '/dashboard': [UserRole.FENAFAR_ADMIN, UserRole.SINDICATO_ADMIN],
+  '/sindicato': [UserRole.SINDICATO_ADMIN, UserRole.MEMBER],
+  '/api/sindicatos': [UserRole.FENAFAR_ADMIN],
+  '/api/convites': [UserRole.FENAFAR_ADMIN],
+  '/api/stats': [UserRole.FENAFAR_ADMIN],
 }
 
-export async function middleware(request: NextRequest) {
+function isPublicRoute(pathname: string): boolean {
+  return publicRoutes.some(route => pathname.startsWith(route))
+}
+
+function getRequiredRole(pathname: string): UserRole[] | null {
+  for (const [route, roles] of Object.entries(roleRoutes)) {
+    if (pathname.startsWith(route)) {
+      return roles
+    }
+  }
+  return null
+}
+
+function verifyToken(token: string): { userId: string; role: UserRole } | null {
+  try {
+    const payload = jwt.decode(token) as any
+    if (!payload || payload.exp < Date.now() / 1000) {
+      return null
+    }
+    return {
+      userId: payload.sub,
+      role: payload.role as UserRole
+    }
+  } catch (error) {
+    return null
+  }
+}
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  
-  // Verificar se é rota pública
-  if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))) {
+
+  // Permitir rotas públicas
+  if (isPublicRoute(pathname)) {
     return NextResponse.next()
   }
 
-  // Verificar token de autenticação (cookies primeiro, depois Authorization header)
-  let token = request.cookies.get('access_token')?.value
-  
+  // Verificar token de autenticação
+  const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
+                request.cookies.get('access_token')?.value
+
   if (!token) {
-    const authHeader = request.headers.get('authorization')
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7)
+    // Redirecionar para login se não estiver autenticado
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      )
     }
-  }
-  
-  if (!token) {
-    // Redirecionar para login se não autenticado
+    
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  try {
-    // Verificar se o token é válido (JWT do Supabase)
-    const parts = token.split('.')
-    if (parts.length !== 3) {
-      throw new Error('Token inválido')
+  // Verificar se o token é válido
+  const tokenData = verifyToken(token)
+  if (!tokenData) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Token inválido ou expirado' },
+        { status: 401 }
+      )
     }
     
-    // Decodificar payload do JWT
-    const payload = JSON.parse(atob(parts[1]))
-    
-    // Verificar se o token não expirou
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      throw new Error('Token expirado')
-    }
-    
-    // Obter role do user_metadata (Supabase)
-    const userRole = payload.user_metadata?.role || 'MEMBER'
-    
-    // Verificar permissões baseadas em role
-    for (const [route, allowedRoles] of Object.entries(roleBasedRoutes)) {
-      if (pathname.startsWith(route)) {
-        if (!allowedRoles.includes(userRole)) {
-          // Redirecionar baseado na role do usuário
-          const redirectUrl = getRedirectUrlForRole(userRole, request.url)
-          return NextResponse.redirect(redirectUrl)
-        }
-        break
-      }
-    }
-    
-    // Adicionar headers com informações do usuário para as páginas
-    const response = NextResponse.next()
-    response.headers.set('x-user-role', userRole)
-    response.headers.set('x-user-id', payload.sub || payload.user_id)
-    
-    return response
-    
-  } catch (error) {
-    console.error('Erro no middleware:', error)
-    // Token inválido, redirecionar para login
     const loginUrl = new URL('/login', request.url)
-    // Remover cookie inválido
-    const response = NextResponse.redirect(loginUrl)
-    response.cookies.delete('access_token')
-    return response
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
-}
 
-function getRedirectUrlForRole(role: string, requestUrl: string): URL {
-  switch (role) {
-    case 'FENAFAR_ADMIN':
-      return new URL('/admin', requestUrl)
-    case 'SINDICATO_ADMIN':
-      return new URL('/sindicato/dashboard', requestUrl)
-    case 'MEMBER':
-      return new URL('/perfil', requestUrl)
-    default:
-      return new URL('/login', requestUrl)
+  // Verificar permissões por role
+  const requiredRoles = getRequiredRole(pathname)
+  if (requiredRoles && !requiredRoles.includes(tokenData.role)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Acesso negado. Permissões insuficientes.' },
+        { status: 403 }
+      )
+    }
+    
+    // Redirecionar para página de acesso negado ou dashboard apropriado
+    const redirectUrl = tokenData.role === UserRole.MEMBER ? '/sindicato' : '/dashboard'
+    return NextResponse.redirect(new URL(redirectUrl, request.url))
   }
+
+  // Adicionar dados do usuário aos headers para uso nas API routes
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-user-id', tokenData.userId)
+  requestHeaders.set('x-user-role', tokenData.role)
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
 }
 
 export const config = {
@@ -117,7 +127,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder (e.g. /public/images)
+     * - public folder
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

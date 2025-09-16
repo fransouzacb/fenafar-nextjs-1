@@ -166,11 +166,20 @@ async function createSindicatos(users: any[]) {
   console.log('🏢 Criando sindicatos de teste...')
   
   const createdSindicatos = []
-  const sindicatoAdmins = users.filter(u => u.role === 'SINDICATO_ADMIN')
+  
+  // Buscar usuários existentes no banco
+  const existingUsers = await prisma.user.findMany({
+    where: { role: 'SINDICATO_ADMIN' }
+  })
   
   for (let i = 0; i < testSindicatos.length; i++) {
     const sindicatoData = testSindicatos[i]
-    const admin = sindicatoAdmins[i] || sindicatoAdmins[0] // Usar primeiro admin se não houver suficiente
+    const admin = existingUsers[i] || existingUsers[0] // Usar primeiro admin se não houver suficiente
+    
+    if (!admin) {
+      console.log(`⚠️ Nenhum admin de sindicato encontrado para ${sindicatoData.name}`)
+      continue
+    }
     
     try {
       const sindicato = await prisma.sindicato.create({
@@ -269,7 +278,16 @@ async function createDocumentos(sindicatos: any[]) {
 async function createConvites(users: any[], sindicatos: any[]) {
   console.log('📧 Criando convites de teste...')
   
-  const admin = users.find(u => u.role === 'FENAFAR_ADMIN')
+  // Buscar admin FENAFAR existente no banco
+  const admin = await prisma.user.findFirst({
+    where: { role: 'FENAFAR_ADMIN' }
+  })
+  
+  if (!admin) {
+    console.log('⚠️ Nenhum admin FENAFAR encontrado para criar convites')
+    return []
+  }
+  
   const createdConvites = []
   
   const testEmails = [
@@ -284,8 +302,8 @@ async function createConvites(users: any[], sindicatos: any[]) {
         data: {
           email,
           role: 'MEMBER',
-          sindicatoId: sindicatos[0].id, // Associar ao primeiro sindicato
-          invitedBy: admin!.id,
+          sindicatoId: sindicatos[0]?.id, // Associar ao primeiro sindicato se existir
+          invitedBy: admin.id,
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
           active: true
         }

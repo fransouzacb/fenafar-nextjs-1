@@ -1,40 +1,42 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { NotificationProvider } from "@/contexts/notification-context";
-import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from '@/hooks/use-auth'
+import { Toaster } from '@/components/ui/sonner'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Sistema FENAFAR",
-  description: "Sistema de gestão para sindicatos e membros da FENAFAR",
-};
+  title: 'Sistema FENAFAR',
+  description: 'Sistema de gestão para sindicatos e membros da FENAFAR',
+  keywords: ['FENAFAR', 'Sindicatos', 'Farmacêuticos', 'Gestão'],
+  authors: [{ name: 'FENAFAR' }],
+  viewport: 'width=device-width, initial-scale=1',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning={true}
-      >
-        <NotificationProvider>
+      <body className={inter.className}>
+        <AuthProvider>
           {children}
-          <Toaster />
-        </NotificationProvider>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--fenafar-card))',
+                color: 'hsl(var(--fenafar-card-foreground))',
+                border: '1px solid hsl(var(--fenafar-border))',
+              },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

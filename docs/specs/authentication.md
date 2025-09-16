@@ -57,7 +57,7 @@ MEMBER (Mínimo)
 - **Páginas**: `/perfil/*`, `/sindicato/documentos`
 - **Ações**:
   - Visualizar documentos do sindicato
-  - Upload de documentos pessoais
+  - Upload de documentos do sindicato
   - Atualizar perfil
   - Ver informações do sindicato
 
