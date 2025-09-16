@@ -30,7 +30,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -70,58 +70,32 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      toast.success('Logout realizado com sucesso!')
-    } catch (error) {
-      toast.error('Erro ao fazer logout')
-    }
-  }
-
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-fenafar-primary"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-heading text-fenafar-primary">FENAFAR Admin</h1>
-              <Badge variant="secondary" className="ml-3">
-                {user?.role}
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Olá, {user?.name || user?.email}
-              </span>
-              <Button variant="outline" onClick={handleLogout}>
-                Sair
-              </Button>
-            </div>
+    <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600">Visão geral do sistema FENAFAR</p>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-heading mb-2">Dashboard Administrativo</h2>
-          <p className="text-caption">
-            Visão geral do sistema FENAFAR
-          </p>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="text-green-600 border-green-200">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Sistema Ativo
+            </Badge>
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
@@ -130,22 +104,7 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(stats?.totalUsers || 0)}</div>
               <p className="text-xs text-muted-foreground">
-                Todos os usuários cadastrados
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Membros Ativos</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatNumber(stats?.activeMembers || 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                de {formatNumber(stats?.totalMembers || 0)} membros totais
+                +{formatNumber(stats?.activeMembers || 0)} membros ativos
               </p>
             </CardContent>
           </Card>
@@ -171,30 +130,63 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(stats?.totalDocumentos || 0)}</div>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(stats?.recentDocumentos || 0)} esta semana
+                +{formatNumber(stats?.recentDocumentos || 0)} esta semana
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Convites Pendentes</CardTitle>
+              <Mail className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(stats?.pendingInvites || 0)}</div>
+              <p className="text-xs text-muted-foreground">
+                Aguardando aprovação
               </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
-                Convites Pendentes
+                <Activity className="h-5 w-5 mr-2" />
+                Membros Ativos
               </CardTitle>
               <CardDescription>
-                Convites aguardando resposta
+                Usuários com atividade recente
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">
-                {formatNumber(stats?.pendingInvites || 0)}
+              <div className="text-3xl font-bold text-green-600">
+                {formatNumber(stats?.activeMembers || 0)}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Convites enviados que ainda não foram aceitos
+                {((stats?.activeMembers || 0) / (stats?.totalUsers || 1) * 100).toFixed(1)}% do total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="h-5 w-5 mr-2" />
+                Sindicatos Ativos
+              </CardTitle>
+              <CardDescription>
+                Sindicatos com atividade recente
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600">
+                {formatNumber(stats?.activeSindicatos || 0)}
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                {((stats?.activeSindicatos || 0) / (stats?.totalSindicatos || 1) * 100).toFixed(1)}% do total
               </p>
             </CardContent>
           </Card>
@@ -222,7 +214,7 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="mt-8">
-          <h3 className="text-subheading mb-4">Ações Rápidas</h3>
+          <h3 className="text-lg font-semibold mb-4">Ações Rápidas</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button className="h-20 flex flex-col items-center justify-center">
               <Building2 className="h-6 w-6 mb-2" />
@@ -238,7 +230,6 @@ export default function AdminDashboard() {
             </Button>
           </div>
         </div>
-      </main>
-    </div>
-  )
+      </div>
+    )
 }

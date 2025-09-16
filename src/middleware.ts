@@ -11,6 +11,8 @@ const publicRoutes = [
   '/redefinir-senha',
   '/api/auth/login',
   '/api/auth/register',
+  '/api/auth/me',
+  '/api/stats',
   '/api/convites/accept',
 ]
 
