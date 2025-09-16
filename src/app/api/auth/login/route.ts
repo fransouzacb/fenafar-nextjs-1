@@ -109,8 +109,7 @@ export async function POST(request: NextRequest) {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           maxAge: 3600, // 1 hora
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost'
+          path: '/'
         })
 
         response.cookies.set('refresh_token', data.session.refresh_token, {
@@ -118,8 +117,7 @@ export async function POST(request: NextRequest) {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           maxAge: 86400, // 24 horas
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost'
+          path: '/'
         })
 
         return response
