@@ -40,6 +40,11 @@ export default function AdminDashboard() {
 
   const loadStats = async () => {
     try {
+      if (typeof window === 'undefined') {
+        setIsLoading(false)
+        return
+      }
+      
       const token = localStorage.getItem('access_token')
       if (!token) {
         throw new Error('Token não encontrado')

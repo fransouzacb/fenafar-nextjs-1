@@ -24,6 +24,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        if (typeof window === 'undefined') {
+          setState({ user: null, isLoading: false, isAuthenticated: false })
+          return
+        }
+        
         const token = localStorage.getItem('access_token')
         if (!token) {
           setState({ user: null, isLoading: false, isAuthenticated: false })
@@ -83,8 +88,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const refreshToken = data.session.refresh_token
 
         // Salvar tokens
-        localStorage.setItem('access_token', token)
-        localStorage.setItem('refresh_token', refreshToken)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('access_token', token)
+          localStorage.setItem('refresh_token', refreshToken)
+        }
 
         // Buscar dados do usuário
         const response = await fetch('/api/auth/me', {
@@ -113,8 +120,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     try {
       await supabase.auth.signOut()
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+      }
       setState({
         user: null,
         isLoading: false,
@@ -153,6 +162,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshToken = async () => {
     try {
+      if (typeof window === 'undefined') throw new Error('Refresh token não encontrado')
       const refreshToken = localStorage.getItem('refresh_token')
       if (!refreshToken) throw new Error('Refresh token não encontrado')
 
@@ -163,8 +173,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (error) throw error
 
       if (data.session) {
-        localStorage.setItem('access_token', data.session.access_token)
-        localStorage.setItem('refresh_token', data.session.refresh_token)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('access_token', data.session.access_token)
+          localStorage.setItem('refresh_token', data.session.refresh_token)
+        }
         return data.session.access_token
       }
     } catch (error) {
@@ -176,6 +188,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const updateProfile = async (data: Partial<AuthUser>) => {
     try {
+      if (typeof window === 'undefined') throw new Error('Token não encontrado')
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('Token não encontrado')
 
