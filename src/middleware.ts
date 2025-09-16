@@ -19,6 +19,7 @@ const publicRoutes = [
 // Rotas que são protegidas pelo cliente (não pelo middleware)
 const clientProtectedRoutes = [
   '/api/auth/me', // Permitir que o cliente gerencie a autenticação
+  '/api/auth/logout', // Permitir logout
 ]
 
 // Rotas que precisam de roles específicas

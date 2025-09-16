@@ -66,7 +66,9 @@ export default function SindicatosPage() {
   const loadSindicatos = async () => {
     try {
       console.log('Carregando sindicatos...')
-      const response = await fetch('/api/sindicatos')
+      const response = await fetch('/api/sindicatos', {
+        credentials: 'include'
+      })
 
       if (!response.ok) {
         throw new Error('Erro ao carregar sindicatos')
@@ -90,7 +92,8 @@ export default function SindicatosPage() {
 
     try {
       const response = await fetch(`/api/sindicatos/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -108,7 +111,8 @@ export default function SindicatosPage() {
   const handleApprove = async (id: string) => {
     try {
       const response = await fetch(`/api/sindicatos/${id}/approve`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -130,7 +134,8 @@ export default function SindicatosPage() {
 
     try {
       const response = await fetch(`/api/sindicatos/${id}/reject`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
       })
 
       if (!response.ok) {

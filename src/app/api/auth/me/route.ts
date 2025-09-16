@@ -1,48 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import jwt from 'jsonwebtoken'
+import { getAuthUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization || !authorization.startsWith('Bearer ')) {
+    // Obter usuário autenticado via cookies
+    const authUser = getAuthUser(request)
+    
+    if (!authUser) {
       return NextResponse.json(
         { error: 'Token de autorização necessário' },
         { status: 401 }
       )
     }
 
-    const token = authorization.replace('Bearer ', '')
-    
-    // Decodificar token
-    const payload = jwt.decode(token) as any
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      )
-    }
-
-    // Verificar se o token expirou
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return NextResponse.json(
-        { error: 'Token expirado' },
-        { status: 401 }
-      )
-    }
-
-    // Para tokens do Supabase, usar o user_id
-    const userId = payload.sub || payload.user_id
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'ID do usuário não encontrado no token' },
-        { status: 401 }
-      )
-    }
-
-    // Buscar usuário no banco
+    // Buscar usuário completo no banco
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: authUser.id },
       select: {
         id: true,
         email: true,

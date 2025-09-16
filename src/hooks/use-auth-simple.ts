@@ -19,7 +19,9 @@ export function useAuthSimple() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me')
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include' // Incluir cookies na requisição
+        })
         
         if (response.ok) {
           const userData = await response.json()
@@ -41,7 +43,10 @@ export function useAuthSimple() {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      })
       setUser(null)
       router.push('/login')
     } catch (error) {
