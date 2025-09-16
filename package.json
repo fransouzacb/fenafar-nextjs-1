@@ -13,6 +13,8 @@
     "db:test": "tsx scripts/test-connection.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/test-connection.ts && tsx scripts/seed.ts",
+    "db:reset-fresh": "tsx scripts/reset-and-seed.ts",
+    "db:clean": "tsx scripts/clean-duplicate-tables.ts",
     "db:studio": "npx prisma studio",
     "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate"

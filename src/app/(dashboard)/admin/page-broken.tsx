@@ -63,7 +63,7 @@ export default function AdminPage() {
       const response = await fetch('/api/stats', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer admin-token`,
+          'Authorization': `Bearer ${user.access_token || 'admin-token'}`,
           'Content-Type': 'application/json',
         },
         cache: 'no-store'
@@ -74,14 +74,14 @@ export default function AdminPage() {
         console.log('✅ Estatísticas carregadas:', realStats)
         
         setStats({
-          users: realStats.users || 0,
-          sindicatos: realStats.sindicatos || 0,
-          membros: realStats.membros || 0,
-          documentos: realStats.documentos || 0,
-          convites: realStats.convites || 0,
-          sindicatosAtivos: realStats.sindicatosAtivos || 0,
-          membrosAtivos: realStats.membrosAtivos || 0,
-          documentosPendentes: realStats.documentosPendentes || 0,
+          users: realStats.totalUsers || 0,
+          sindicatos: realStats.totalSindicatos || 0,
+          membros: realStats.totalMembros || 0,
+          documentos: realStats.totalDocumentos || 0,
+          convites: realStats.pendingInvites || 0,
+          sindicatosAtivos: realStats.activeSindicatos || 0,
+          membrosAtivos: realStats.activeUsers || 0,
+          documentosPendentes: realStats.recentDocumentos || 0,
         })
         setIsUsingMockData(false)
       } else {
@@ -106,6 +106,11 @@ export default function AdminPage() {
       }, 500)
       
       return () => clearTimeout(timeout)
+    }
+  }, [user, loading, isAdmin, router])
+      router.push("/login")
+    } else if (!loading && user && !isAdmin()) {
+      router.push("/sindicato")
     }
   }, [user, loading, isAdmin, router])
 
@@ -137,23 +142,9 @@ export default function AdminPage() {
               <p className="text-blue-100">
                 Bem-vindo, {user.user_metadata?.name || user.email}
               </p>
-              <div className="mt-2 flex gap-2">
-                {isUsingMockData && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                    Dados Demo
-                  </Badge>
-                )}
-                {isLoadingStats && (
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    Carregando...
-                  </Badge>
-                )}
-                {!isUsingMockData && !isLoadingStats && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    Dados Reais
-                  </Badge>
-                )}
-              </div>
+              <Badge variant="secondary" className="mt-2 bg-yellow-100 text-yellow-800">
+                Dados Demo - Versão de Desenvolvimento
+              </Badge>
             </div>
             <div className="text-right">
               <p className="text-blue-100 text-sm">Hoje</p>
@@ -176,13 +167,11 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Sindicatos</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats.sindicatos}
-                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.sindicatos}</p>
                 <div className="flex items-center mt-2">
                   <CheckCircle2 className="w-4 h-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">
-                    {isLoadingStats ? '...' : stats.sindicatosAtivos} ativos
+                    {stats.sindicatosAtivos} ativos
                   </span>
                 </div>
               </div>
@@ -196,13 +185,11 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Membros</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats.membros}
-                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.membros}</p>
                 <div className="flex items-center mt-2">
                   <Activity className="w-4 h-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">
-                    {isLoadingStats ? '...' : stats.membrosAtivos} ativos
+                    {stats.membrosAtivos} ativos
                   </span>
                 </div>
               </div>
@@ -216,13 +203,11 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Documentos</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats.documentos}
-                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.documentos}</p>
                 <div className="flex items-center mt-2">
                   <AlertCircle className="w-4 h-4 text-orange-500 mr-1" />
                   <span className="text-sm text-orange-600">
-                    {isLoadingStats ? '...' : stats.documentosPendentes} pendentes
+                    {stats.documentosPendentes} pendentes
                   </span>
                 </div>
               </div>
@@ -236,9 +221,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Convites</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {isLoadingStats ? '...' : stats.convites}
-                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.convites}</p>
                 <div className="flex items-center mt-2">
                   <Mail className="w-4 h-4 text-blue-500 mr-1" />
                   <span className="text-sm text-blue-600">Enviados</span>
@@ -265,11 +248,11 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Sindicatos Ativos</span>
                 <span className="text-sm text-gray-600">
-                  {isLoadingStats ? '...' : `${stats.sindicatosAtivos}/${stats.sindicatos}`}
+                  {stats.sindicatosAtivos}/{stats.sindicatos}
                 </span>
               </div>
               <Progress 
-                value={isLoadingStats ? 0 : (stats.sindicatos > 0 ? (stats.sindicatosAtivos / stats.sindicatos) * 100 : 0)} 
+                value={stats.sindicatos > 0 ? (stats.sindicatosAtivos / stats.sindicatos) * 100 : 0} 
                 className="h-2" 
               />
             </div>
@@ -278,11 +261,11 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Membros Ativos</span>
                 <span className="text-sm text-gray-600">
-                  {isLoadingStats ? '...' : `${stats.membrosAtivos}/${stats.membros}`}
+                  {stats.membrosAtivos}/{stats.membros}
                 </span>
               </div>
               <Progress 
-                value={isLoadingStats ? 0 : (stats.membros > 0 ? (stats.membrosAtivos / stats.membros) * 100 : 0)} 
+                value={stats.membros > 0 ? (stats.membrosAtivos / stats.membros) * 100 : 0} 
                 className="h-2" 
               />
             </div>
@@ -291,11 +274,11 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Documentos Aprovados</span>
                 <span className="text-sm text-gray-600">
-                  {isLoadingStats ? '...' : `${stats.documentos - stats.documentosPendentes}/${stats.documentos}`}
+                  {stats.documentos - stats.documentosPendentes}/{stats.documentos}
                 </span>
               </div>
               <Progress 
-                value={isLoadingStats ? 0 : (stats.documentos > 0 ? ((stats.documentos - stats.documentosPendentes) / stats.documentos) * 100 : 0)} 
+                value={stats.documentos > 0 ? ((stats.documentos - stats.documentosPendentes) / stats.documentos) * 100 : 0} 
                 className="h-2" 
               />
             </div>
@@ -310,7 +293,7 @@ export default function AdminPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {!isLoadingStats && stats.documentosPendentes > 0 && (
+            {stats.documentosPendentes > 0 && (
               <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-orange-600" />
@@ -320,7 +303,7 @@ export default function AdminPage() {
               </div>
             )}
             
-            {!isLoadingStats && stats.convites > 0 && (
+            {stats.convites > 0 && (
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-blue-600" />
@@ -330,17 +313,10 @@ export default function AdminPage() {
               </div>
             )}
             
-            {(!isLoadingStats && stats.documentosPendentes === 0 && stats.convites === 0) && (
+            {(stats.documentosPendentes === 0 && stats.convites === 0) && (
               <div className="text-center py-4">
                 <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Tudo em dia!</p>
-              </div>
-            )}
-
-            {isLoadingStats && (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Carregando dados...</p>
               </div>
             )}
           </CardContent>
@@ -436,12 +412,6 @@ export default function AdminPage() {
                 <span className="text-sm font-medium text-gray-600">Sessão iniciada:</span>
                 <span className="text-sm">{new Date().toLocaleString('pt-BR')}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium text-gray-600">Fonte dos dados:</span>
-                <Badge variant={isUsingMockData ? "secondary" : "default"}>
-                  {isUsingMockData ? 'Mock' : 'API Real'}
-                </Badge>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -462,37 +432,19 @@ export default function AdminPage() {
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-600">API Stats:</span>
-                <Badge variant="default" className={isLoadingStats ? "bg-yellow-100 text-yellow-800" : (isUsingMockData ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800")}>
-                  {isLoadingStats ? 'Carregando' : (isUsingMockData ? 'Mock Data' : 'Conectada')}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Banco de dados:</span>
                 <Badge variant="default" className="bg-green-100 text-green-800">
                   Conectado
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-600">Último backup:</span>
+                <span className="text-sm">Automático</span>
+              </div>
+              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Versão:</span>
                 <span className="text-sm font-mono">v1.0.0</span>
               </div>
-              {!isUsingMockData && (
-                <div className="mt-4">
-                  <Button
-                    onClick={() => {
-                      hasLoadedStats.current = false
-                      loadRealStats()
-                    }}
-                    variant="outline"
-                    size="sm"
-                    disabled={isLoadingStats}
-                    className="w-full"
-                  >
-                    {isLoadingStats ? 'Carregando...' : 'Atualizar Dados'}
-                  </Button>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
