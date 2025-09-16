@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
-import { prisma } from '@/lib/prisma'
 import { AuthUser, AuthState, AuthContextType, LoginRequest, RegisterRequest, TokenPayload } from '@/types/auth'
 import { UserRole } from '@prisma/client'
 import jwt from 'jsonwebtoken'
