@@ -4,7 +4,7 @@ import { useAuth } from '@/components/providers/auth-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { User, Mail, Phone, Building2, Calendar, Edit } from 'lucide-react'
+import { User, Mail, Phone, Building2, Calendar, Edit, FileText } from 'lucide-react'
 
 export default function PerfilPage() {
   const { user } = useAuth()
