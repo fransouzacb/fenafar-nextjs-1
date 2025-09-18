@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAuthSimple } from '@/hooks/use-auth-simple'
+import { useAuth } from '@/components/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { 
   Building2, 
@@ -23,7 +23,7 @@ interface SindicatoLayoutProps {
 
 export function SindicatoLayout({ children }: SindicatoLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, logout } = useAuthSimple()
+  const { user, logout } = useAuth()
   const pathname = usePathname()
 
   const navigation = [

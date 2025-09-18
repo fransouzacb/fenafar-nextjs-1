@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthSimple } from '@/hooks/use-auth-simple'
+import { useAuth } from '@/components/providers/auth-provider'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { SindicatoLayout } from '@/components/layouts/sindicato-layout'
@@ -10,22 +10,22 @@ export default function SindicatoPageLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, authLoading } = useAuthSimple()
+  const { user, isLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isLoading && !user) {
       router.push('/login')
       return
     }
 
     if (user && user.role !== 'SINDICATO_ADMIN') {
-      router.push('/dashboard')
+      router.push('/admin')
       return
     }
-  }, [user, authLoading, router])
+  }, [user, isLoading, router])
 
-  if (authLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
