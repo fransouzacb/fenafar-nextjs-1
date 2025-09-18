@@ -30,6 +30,7 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
     const baseNavigation = [
       { name: 'Dashboard', href: '/sindicato', icon: Building2, roles: ['SINDICATO_ADMIN', 'MEMBER'] },
       { name: 'Documentos', href: '/sindicato/documentos', icon: FileText, roles: ['SINDICATO_ADMIN', 'MEMBER'] },
+      { name: 'Perfil', href: '/sindicato/perfil', icon: User, roles: ['SINDICATO_ADMIN', 'MEMBER'] },
     ]
 
     // Apenas SINDICATO_ADMIN pode ver estas funcionalidades
@@ -38,13 +39,6 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
         { name: 'Membros', href: '/sindicato/membros', icon: Users, roles: ['SINDICATO_ADMIN'] },
         { name: 'Convites', href: '/sindicato/convites', icon: Mail, roles: ['SINDICATO_ADMIN'] },
         { name: 'Configurações', href: '/sindicato/configuracoes', icon: Settings, roles: ['SINDICATO_ADMIN'] }
-      )
-    }
-
-    // Apenas MEMBER pode ver Perfil
-    if (user?.role === 'MEMBER') {
-      baseNavigation.push(
-        { name: 'Perfil', href: '/sindicato/perfil', icon: User, roles: ['MEMBER'] }
       )
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +34,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Serviço de upload não disponível' },
+        { status: 500 }
+      )
+    }
 
     // Gerar nome único para o arquivo
     const fileExt = file.name.split('.').pop()
@@ -42,7 +47,7 @@ export async function POST(request: NextRequest) {
     const filePath = `avatars/${fileName}`
 
     // Upload para Supabase Storage
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('avatars')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -58,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Obter URL pública do arquivo
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = supabaseAdmin.storage
       .from('avatars')
       .getPublicUrl(filePath)
 

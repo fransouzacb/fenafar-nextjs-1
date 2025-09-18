@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
 
 const changePasswordSchema = z.object({
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = changePasswordSchema.parse(body)
 
-    const supabase = createClient()
+    // Usar o cliente Supabase existente
 
     // Verificar senha atual
     const { error: signInError } = await supabase.auth.signInWithPassword({
