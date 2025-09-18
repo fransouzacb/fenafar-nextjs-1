@@ -46,14 +46,27 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   })
   const [error, setError] = useState<string | null>(null)
 
-  const redirectTo = searchParams.get('redirect') || '/admin'
+  const redirectTo = searchParams.get('redirect')
+
+  const getRedirectPath = (role: string) => {
+    switch (role) {
+      case 'FENAFAR_ADMIN':
+        return '/admin'
+      case 'SINDICATO_ADMIN':
+        return '/sindicato'
+      case 'MEMBER':
+        return '/perfil'
+      default:
+        return '/admin'
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
     try {
-      await login(formData)
+      const result = await login(formData)
       toast.success('Login realizado com sucesso!')
       
       // Aguardar um pouco para garantir que o estado foi atualizado
@@ -61,7 +74,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         if (onSuccess) {
           onSuccess()
         } else {
-          router.push(redirectTo)
+          // Redirecionar baseado na role do usuário
+          const userRole = result?.user?.role || 'FENAFAR_ADMIN'
+          const redirectPath = redirectTo || getRedirectPath(userRole)
+          router.push(redirectPath)
         }
       }, 100)
     } catch (err: any) {

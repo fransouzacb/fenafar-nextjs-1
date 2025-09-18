@@ -113,6 +113,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             isLoading: false,
             isAuthenticated: true,
           })
+          
+          // Retornar o usuário para o componente de login
+          return { user: userData }
         } else {
           throw new Error('Erro ao buscar dados do usuário')
         }
