@@ -19,7 +19,8 @@ export default function SindicatoPageLayout({
       return
     }
 
-    if (user && user.role !== 'SINDICATO_ADMIN') {
+    // Permitir acesso para SINDICATO_ADMIN e MEMBER
+    if (user && !['SINDICATO_ADMIN', 'MEMBER'].includes(user.role)) {
       router.push('/admin')
       return
     }
@@ -33,7 +34,7 @@ export default function SindicatoPageLayout({
     )
   }
 
-  if (!user || user.role !== 'SINDICATO_ADMIN') {
+  if (!user || !['SINDICATO_ADMIN', 'MEMBER'].includes(user.role)) {
     return null
   }
 

@@ -55,7 +55,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       case 'SINDICATO_ADMIN':
         return '/sindicato'
       case 'MEMBER':
-        return '/perfil'
+        return '/sindicato' // Membros também vão para o painel do sindicato
       default:
         return '/admin'
     }

@@ -26,13 +26,25 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
   const { user, logout } = useAuth()
   const pathname = usePathname()
 
-  const navigation = [
-    { name: 'Dashboard', href: '/sindicato', icon: Building2 },
-    { name: 'Membros', href: '/sindicato/membros', icon: Users },
-    { name: 'Documentos', href: '/sindicato/documentos', icon: FileText },
-    { name: 'Convites', href: '/sindicato/convites', icon: Mail },
-    { name: 'Configurações', href: '/sindicato/configuracoes', icon: Settings },
-  ]
+  const getNavigation = () => {
+    const baseNavigation = [
+      { name: 'Dashboard', href: '/sindicato', icon: Building2, roles: ['SINDICATO_ADMIN', 'MEMBER'] },
+      { name: 'Documentos', href: '/sindicato/documentos', icon: FileText, roles: ['SINDICATO_ADMIN', 'MEMBER'] },
+    ]
+
+    // Apenas SINDICATO_ADMIN pode ver estas funcionalidades
+    if (user?.role === 'SINDICATO_ADMIN') {
+      baseNavigation.push(
+        { name: 'Membros', href: '/sindicato/membros', icon: Users, roles: ['SINDICATO_ADMIN'] },
+        { name: 'Convites', href: '/sindicato/convites', icon: Mail, roles: ['SINDICATO_ADMIN'] },
+        { name: 'Configurações', href: '/sindicato/configuracoes', icon: Settings, roles: ['SINDICATO_ADMIN'] }
+      )
+    }
+
+    return baseNavigation
+  }
+
+  const navigation = getNavigation()
 
   const isActive = (href: string) => {
     if (href === '/sindicato') {
@@ -46,7 +58,7 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -59,7 +71,7 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
       <div className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0
+        lg:translate-x-0 lg:static lg:inset-0 lg:flex-shrink-0
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -68,7 +80,9 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
               <Building2 className="h-8 w-8 text-blue-600" />
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">Sindicato</h1>
-                <p className="text-xs text-gray-500">Painel Administrativo</p>
+                <p className="text-xs text-gray-500">
+                  {user?.role === 'SINDICATO_ADMIN' ? 'Painel Administrativo' : 'Painel do Membro'}
+                </p>
               </div>
             </div>
             <button
@@ -137,15 +151,15 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6">
+        <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 lg:px-6">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
             
             <div className="flex items-center space-x-4">
@@ -157,7 +171,7 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="flex-1">
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">
           {children}
         </main>
       </div>
