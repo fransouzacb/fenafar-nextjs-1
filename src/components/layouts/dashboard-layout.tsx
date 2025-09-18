@@ -11,7 +11,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  User
 } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -57,6 +58,12 @@ const menuItems = [
     href: '/admin/configuracoes',
     icon: Settings,
     roles: ['FENAFAR_ADMIN', 'SINDICATO_ADMIN']
+  },
+  {
+    name: 'Perfil',
+    href: '/admin/perfil',
+    icon: User,
+    roles: ['FENAFAR_ADMIN', 'SINDICATO_ADMIN', 'MEMBER']
   }
 ]
 
