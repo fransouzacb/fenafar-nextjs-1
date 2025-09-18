@@ -29,11 +29,6 @@ export function getAuthUser(request: NextRequest): AuthUser | null {
     const userId = payload.sub || payload.user_id
     if (!userId) return null
 
-    // Debug temporário para membros
-    if (payload.email === 'membro1@teste.com') {
-      console.log('🔍 DEBUG MEMBRO - Token payload:', JSON.stringify(payload, null, 2))
-      console.log('🔍 DEBUG MEMBRO - User ID extraído:', userId)
-    }
 
     return {
       id: userId,
