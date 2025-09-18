@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuthSimple } from '@/hooks/use-auth-simple'
+import { useAuth } from '@/components/providers/auth-provider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -23,7 +23,7 @@ interface SindicatoStats {
 }
 
 export default function SindicatoDashboard() {
-  const { user } = useAuthSimple()
+  const { user } = useAuth()
   const [stats, setStats] = useState<SindicatoStats | null>(null)
   const [loading, setLoading] = useState(true)
 
