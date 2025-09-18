@@ -40,13 +40,17 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log('🔍 DEBUG /api/auth/me - Usuário encontrado:', user)
+
     if (!user || !user.active) {
+      console.log('❌ DEBUG /api/auth/me - Usuário não encontrado ou inativo')
       return NextResponse.json(
         { error: 'Usuário não encontrado ou inativo' },
         { status: 404 }
       )
     }
 
+    console.log('✅ DEBUG /api/auth/me - Retornando usuário com sucesso')
     return NextResponse.json(user)
 
   } catch (error) {
