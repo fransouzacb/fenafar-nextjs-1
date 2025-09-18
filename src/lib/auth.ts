@@ -29,6 +29,7 @@ export function getAuthUser(request: NextRequest): AuthUser | null {
     const userId = payload.sub || payload.user_id
     if (!userId) return null
 
+
     return {
       id: userId,
       email: payload.email || '',
