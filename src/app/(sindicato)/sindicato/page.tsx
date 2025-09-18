@@ -11,7 +11,8 @@ import {
   Building2,
   TrendingUp,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  User
 } from 'lucide-react'
 
 interface SindicatoStats {
@@ -207,18 +208,37 @@ export default function SindicatoDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button className="w-full justify-start" variant="outline">
-              <Users className="h-4 w-4 mr-2" />
-              Gerenciar Membros
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Upload de Documentos
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Mail className="h-4 w-4 mr-2" />
-              Enviar Convites
-            </Button>
+            {user?.role === 'SINDICATO_ADMIN' ? (
+              <>
+                <Button className="w-full justify-start" variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  Gerenciar Membros
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Upload de Documentos
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Enviar Convites
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button className="w-full justify-start" variant="outline">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Meus Documentos
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <User className="h-4 w-4 mr-2" />
+                  Meu Perfil
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Informações do Sindicato
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 

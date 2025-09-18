@@ -41,6 +41,13 @@ export function SindicatoLayout({ children }: SindicatoLayoutProps) {
       )
     }
 
+    // Apenas MEMBER pode ver Perfil
+    if (user?.role === 'MEMBER') {
+      baseNavigation.push(
+        { name: 'Perfil', href: '/sindicato/perfil', icon: User, roles: ['MEMBER'] }
+      )
+    }
+
     return baseNavigation
   }
 
