@@ -249,11 +249,11 @@ src/
 - **Permissões**: Apenas FENAFAR_ADMIN pode gerenciar
 - **Interface**: Formulários responsivos com validação em tempo real
 
-#### 4.2 Painel do Sindicato (60 min)
-- [ ] Dashboard do sindicato
-- [ ] Layout específico para SINDICATO_ADMIN
-- [ ] Navegação entre seções
-- [ ] Estatísticas do sindicato
+#### 4.2 Painel do Sindicato (60 min) ✅
+- [x] Dashboard do sindicato ✅
+- [x] Layout específico para SINDICATO_ADMIN ✅
+- [x] Navegação entre seções ✅
+- [x] Estatísticas do sindicato ✅
 
 #### 4.3 CRUD de Membros (90 min)
 - [ ] Listagem de membros
