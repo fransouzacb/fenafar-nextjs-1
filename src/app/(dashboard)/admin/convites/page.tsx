@@ -365,37 +365,44 @@ export default function ConvitesPage() {
             
             return (
               <Card key={convite.id} className="fenafar-card">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <UserPlus className="h-5 w-5 text-blue-600" />
+                <CardHeader className="pb-3">
+                  {/* Primeira linha: Email e ícone */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <UserPlus className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{convite.email}</CardTitle>
-                        <CardDescription className="text-sm text-gray-500">
-                          {convite.sindicato?.name || 'Sem sindicato'}
-                        </CardDescription>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base truncate">{convite.email}</CardTitle>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`${roleInfo.bgColor} ${roleInfo.color} border-0`}
-                      >
-                        {roleInfo.text}
-                      </Badge>
-                      <Badge 
-                        variant="outline" 
-                        className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
-                      >
+                  </div>
+                  
+                  {/* Segunda linha: Sindicato */}
+                  <div className="mb-2">
+                    <CardDescription className="text-sm text-gray-500 truncate">
+                      {convite.sindicato?.name || 'Sem sindicato'}
+                    </CardDescription>
+                  </div>
+                  
+                  {/* Terceira linha: Badges em linha horizontal */}
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge 
+                      variant="outline" 
+                      className={`${roleInfo.bgColor} ${roleInfo.color} border-0 text-xs px-2 py-1`}
+                    >
+                      {roleInfo.text}
+                    </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`${statusInfo.bgColor} ${statusInfo.color} border-0 text-xs px-2 py-1`}
+                    >
 {(() => {
-                          const StatusIcon = statusInfo.icon
-                          return <StatusIcon className="h-3 w-3 mr-1" />
-                        })()}
-                        {statusInfo.text}
-                      </Badge>
-                    </div>
+                        const StatusIcon = statusInfo.icon
+                        return <StatusIcon className="h-3 w-3 mr-1" />
+                      })()}
+                      {statusInfo.text}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
