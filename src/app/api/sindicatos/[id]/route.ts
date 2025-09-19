@@ -63,9 +63,11 @@ export async function GET(
     const sindicato = await prisma.sindicato.findUnique({
       where: { id: params.id },
       include: {
-        _count: {
+        admin: {
           select: {
-            membros: true
+            id: true,
+            name: true,
+            email: true
           }
         }
       }
@@ -221,9 +223,11 @@ export async function PUT(
         active: active !== false
       },
       include: {
-        _count: {
+        admin: {
           select: {
-            membros: true
+            id: true,
+            name: true,
+            email: true
           }
         }
       }
@@ -305,28 +309,13 @@ export async function DELETE(
 
     // Verificar se sindicato existe
     const existingSindicato = await prisma.sindicato.findUnique({
-      where: { id: params.id },
-      include: {
-        _count: {
-          select: {
-            membros: true
-          }
-        }
-      }
+      where: { id: params.id }
     })
 
     if (!existingSindicato) {
       return NextResponse.json(
         { error: 'Sindicato não encontrado' },
         { status: 404 }
-      )
-    }
-
-    // Verificar se há membros associados
-    if (existingSindicato._count.membros > 0) {
-      return NextResponse.json(
-        { error: 'Não é possível excluir sindicato com membros associados' },
-        { status: 400 }
       )
     }
 

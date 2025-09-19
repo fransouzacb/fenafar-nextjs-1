@@ -24,12 +24,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar sindicatos com contagem de membros
+    // Buscar sindicatos
     const sindicatos = await prisma.sindicato.findMany({
       include: {
-        _count: {
+        admin: {
           select: {
-            membros: true
+            id: true,
+            name: true,
+            email: true
           }
         }
       },

@@ -17,10 +17,9 @@ export async function GET(request: NextRequest) {
       totalUsers,
       totalSindicatos,
       totalDocumentos,
-      totalMembros,
+      totalMembers,
       pendingInvites,
       activeSindicatos,
-      activeMembers,
       recentDocumentos,
       totalAdmins,
       totalSindicatoAdmins,
@@ -28,7 +27,11 @@ export async function GET(request: NextRequest) {
       prisma.user.count(),
       prisma.sindicato.count(),
       prisma.documento.count(),
-      prisma.membro.count(),
+      prisma.user.count({
+        where: {
+          role: UserRole.MEMBER
+        }
+      }),
       prisma.convite.count({
         where: {
           usado: false,
@@ -40,11 +43,6 @@ export async function GET(request: NextRequest) {
       prisma.sindicato.count({
         where: {
           active: true
-        }
-      }),
-      prisma.membro.count({
-        where: {
-          ativo: true
         }
       }),
       prisma.documento.count({
@@ -70,17 +68,16 @@ export async function GET(request: NextRequest) {
       totalUsers,
       totalSindicatos,
       totalDocumentos,
-      totalMembros,
+      totalMembers,
       pendingInvites,
       activeSindicatos,
-      activeMembers,
       recentDocumentos,
       totalAdmins,
       totalSindicatoAdmins,
       // Estatísticas calculadas
-      totalActiveUsers: activeMembers + totalSindicatoAdmins + totalAdmins,
+      totalActiveUsers: totalMembers + totalSindicatoAdmins + totalAdmins,
       documentosPorSindicato: totalSindicatos > 0 ? Math.round(totalDocumentos / totalSindicatos * 100) / 100 : 0,
-      membrosPorSindicato: totalSindicatos > 0 ? Math.round(totalMembros / totalSindicatos * 100) / 100 : 0,
+      membrosPorSindicato: totalSindicatos > 0 ? Math.round(totalMembers / totalSindicatos * 100) / 100 : 0,
     }
 
     return NextResponse.json(stats)
