@@ -13,6 +13,7 @@ interface ConviteFormData {
   email: string
   role: 'SINDICATO_ADMIN' | 'MEMBER'
   sindicatoId?: string
+  maxMembers?: number
 }
 
 interface Sindicato {
@@ -31,7 +32,8 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
   const [formData, setFormData] = useState<ConviteFormData>({
     email: '',
     role: 'MEMBER',
-    sindicatoId: ''
+    sindicatoId: '',
+    maxMembers: undefined
   })
   const [sindicatos, setSindicatos] = useState<Sindicato[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -42,7 +44,8 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
       setFormData({
         email: convite.email,
         role: convite.role,
-        sindicatoId: convite.sindicatoId || ''
+        sindicatoId: convite.sindicatoId || '',
+        maxMembers: convite.maxMembers || undefined
       })
     }
     loadSindicatos()
@@ -83,11 +86,15 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
       newErrors.sindicatoId = 'Sindicato é obrigatório para admin de sindicato'
     }
 
+    if (formData.role === 'SINDICATO_ADMIN' && (!formData.maxMembers || formData.maxMembers <= 0)) {
+      newErrors.maxMembers = 'Limite de membros é obrigatório para admin de sindicato'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleChange = (field: keyof ConviteFormData, value: string) => {
+  const handleChange = (field: keyof ConviteFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     
     // Limpar erro do campo quando usuário começar a digitar
@@ -114,7 +121,8 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
 
       const payload = {
         ...formData,
-        sindicatoId: formData.sindicatoId || null
+        sindicatoId: formData.role === 'SINDICATO_ADMIN' ? formData.sindicatoId || null : null,
+        maxMembers: formData.role === 'SINDICATO_ADMIN' ? formData.maxMembers || null : null
       }
 
       const response = await fetch(url, {
@@ -224,6 +232,28 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
                 </select>
                 {errors.sindicatoId && (
                   <p className="text-sm text-red-500">{errors.sindicatoId}</p>
+                )}
+              </div>
+            )}
+
+            {/* Limite de Membros (apenas para SINDICATO_ADMIN) */}
+            {formData.role === 'SINDICATO_ADMIN' && (
+              <div className="space-y-2">
+                <Label htmlFor="maxMembers">Limite de Membros *</Label>
+                <Input
+                  id="maxMembers"
+                  type="number"
+                  min="1"
+                  value={formData.maxMembers || ''}
+                  onChange={(e) => handleChange('maxMembers', parseInt(e.target.value) || 0)}
+                  placeholder="Ex: 100"
+                  className={errors.maxMembers ? 'border-red-500' : ''}
+                />
+                <p className="text-xs text-gray-500">
+                  Número máximo de membros que este sindicato pode ter
+                </p>
+                {errors.maxMembers && (
+                  <p className="text-sm text-red-500">{errors.maxMembers}</p>
                 )}
               </div>
             )}

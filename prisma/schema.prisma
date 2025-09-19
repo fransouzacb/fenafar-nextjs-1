@@ -22,9 +22,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   
   // Relacionamentos
-  membro        Membro?
   sindicato     Sindicato? @relation("SindicatoAdmin")
   convites      Convite[] @relation("CriadoPor")
+  documentos    Documento[]
   
   @@map("users")
 }
@@ -45,13 +45,13 @@ model Sindicato {
   status      SindicatoStatus @default(PENDING)
   approvedAt  DateTime?
   approvedBy  String?
+  maxMembers  Int?     // Limite de membros definido pelo FENAFAR_ADMIN
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   // Relacionamentos
   adminId     String   @unique
   admin       User     @relation("SindicatoAdmin", fields: [adminId], references: [id])
-  membros     Membro[]
   documentos  Documento[]
   convites    Convite[]
   
@@ -59,26 +59,6 @@ model Sindicato {
 }
 
 
-model Membro {
-  id          String   @id @default(uuid())
-  nome        String
-  cpf         String   @unique
-  email       String
-  telefone    String?
-  cargo       String?
-  ativo       Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relacionamentos
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
-  sindicatoId String
-  sindicato   Sindicato @relation(fields: [sindicatoId], references: [id])
-  documentos  Documento[]
-  
-  @@map("membros")
-}
 
 model Documento {
   id          String        @id @default(uuid())
@@ -95,8 +75,8 @@ model Documento {
   // Relacionamentos
   sindicatoId String
   sindicato   Sindicato @relation(fields: [sindicatoId], references: [id])
-  membroId    String?
-  membro      Membro?   @relation(fields: [membroId], references: [id])
+  userId      String?   // Usuário que criou/fez upload do documento
+  user        User?     @relation(fields: [userId], references: [id])
   
   @@map("documentos")
 }
@@ -108,6 +88,7 @@ model Convite {
   role        UserRole  @default(SINDICATO_ADMIN)
   expiresAt   DateTime
   usado       Boolean   @default(false)
+  maxMembers  Int?      // Limite de membros para convites de SINDICATO_ADMIN
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   

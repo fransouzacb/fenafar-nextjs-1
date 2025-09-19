@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
 import { 
   Mail, 
   Plus, 
@@ -19,10 +18,7 @@ import {
   UserPlus,
   Building2,
   Calendar,
-  AlertCircle,
-  Eye,
-  Send,
-  X
+  AlertCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
@@ -36,7 +32,6 @@ interface Convite {
   token: string
   usado: boolean
   expiresAt: string
-  maxMembers?: number | null
   createdAt: string
   updatedAt: string
   sindicatoId?: string
@@ -67,10 +62,9 @@ export default function ConvitesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingConvite, setEditingConvite] = useState<Convite | null>(null)
-  const [viewingConvite, setViewingConvite] = useState<Convite | null>(null)
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean
-    type: 'delete' | 'resend' | null
+    type: 'delete' | null
     convite: Convite | null
   }>({
     open: false,
@@ -129,7 +123,7 @@ export default function ConvitesPage() {
     }
   }
 
-  const openConfirmationDialog = (type: 'delete' | 'resend', convite: Convite) => {
+  const openConfirmationDialog = (type: 'delete', convite: Convite) => {
     setConfirmationDialog({
       open: true,
       type,
@@ -165,23 +159,6 @@ export default function ConvitesPage() {
             }
           })
           successMessage = 'Convite excluído com sucesso!'
-          break
-
-        case 'resend':
-          response = await fetch('/api/convites', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              email: convite.email,
-              role: convite.role,
-              sindicatoId: convite.sindicatoId,
-              maxMembers: convite.maxMembers
-            })
-          })
-          successMessage = 'Convite reenviado com sucesso!'
           break
 
         default:
@@ -439,38 +416,16 @@ export default function ConvitesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setViewingConvite(convite)}
-                        title="Visualizar convite"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => setEditingConvite(convite)}
                         disabled={convite.usado}
-                        title="Editar convite"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      {!convite.usado && new Date(convite.expiresAt) >= new Date() && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog('resend', convite)}
-                          title="Reenviar convite"
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      )}
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => openConfirmationDialog('delete', convite)}
                         className="text-red-600 hover:text-red-700"
-                        disabled={convite.usado}
-                        title="Excluir convite"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -523,86 +478,14 @@ export default function ConvitesPage() {
         />
       )}
 
-      {/* Modal de Visualização */}
-      {viewingConvite && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Eye className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <CardTitle>Detalhes do Convite</CardTitle>
-                    <CardDescription>Informações completas do convite</CardDescription>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setViewingConvite(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Email</Label>
-                  <p className="text-sm">{viewingConvite.email}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Função</Label>
-                  <p className="text-sm">{viewingConvite.role === 'SINDICATO_ADMIN' ? 'Administrador de Sindicato' : 'Membro'}</p>
-                </div>
-                {viewingConvite.sindicato && (
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500">Sindicato</Label>
-                    <p className="text-sm">{viewingConvite.sindicato.name} ({viewingConvite.sindicato.cnpj})</p>
-                  </div>
-                )}
-                {viewingConvite.maxMembers && (
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500">Limite de Membros</Label>
-                    <p className="text-sm">{viewingConvite.maxMembers}</p>
-                  </div>
-                )}
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Token</Label>
-                  <p className="text-sm font-mono bg-gray-100 p-2 rounded">{viewingConvite.token}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Expira em</Label>
-                  <p className="text-sm">{formatDate(viewingConvite.expiresAt)}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Status</Label>
-                  <p className="text-sm">{viewingConvite.usado ? 'Usado' : 'Pendente'}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Criado por</Label>
-                  <p className="text-sm">{viewingConvite.criadoPor.name} ({viewingConvite.criadoPor.email})</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Dialog de Confirmação */}
       <ConfirmationDialog
         open={confirmationDialog.open}
         onOpenChange={closeConfirmationDialog}
         onConfirm={handleConfirmAction}
-        title={confirmationDialog.type === 'delete' ? 'Excluir Convite' : 'Reenviar Convite'}
-        description={
-          confirmationDialog.type === 'delete' 
-            ? `Tem certeza que deseja excluir o convite para "${confirmationDialog.convite?.email}"? Esta ação não pode ser desfeita.`
-            : `Tem certeza que deseja reenviar o convite para "${confirmationDialog.convite?.email}"? Um novo token será gerado.`
-        }
-        variant={confirmationDialog.type === 'delete' ? 'danger' : 'default'}
+        title="Excluir Convite"
+        description={`Tem certeza que deseja excluir o convite para "${confirmationDialog.convite?.email}"? Esta ação não pode ser desfeita.`}
+        variant="danger"
         isLoading={isProcessing}
       />
     </div>
