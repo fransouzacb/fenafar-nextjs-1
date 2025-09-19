@@ -45,8 +45,10 @@ interface Sindicato {
   approvedBy?: string
   createdAt: string
   updatedAt: string
-  _count: {
-    membros: number
+  admin: {
+    id: string
+    name: string
+    email: string
   }
 }
 
@@ -307,9 +309,9 @@ export default function SindicatosPage() {
             <div className="flex items-center">
               <Users className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total de Membros</p>
+                <p className="text-sm font-medium text-gray-500">Total de Admins</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sindicatos.reduce((acc, s) => acc + s._count.membros, 0)}
+                  {sindicatos.length}
                 </p>
               </div>
             </div>
@@ -396,7 +398,7 @@ export default function SindicatosPage() {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center text-sm text-gray-500">
                     <Users className="h-4 w-4 mr-1" />
-                    {sindicato._count.membros} membros
+                    Admin: {sindicato.admin?.name || 'N/A'}
                   </div>
                   <div className="flex space-x-2">
                     {sindicato.status === 'PENDING' && (
