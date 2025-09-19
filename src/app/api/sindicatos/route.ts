@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
         ...data,
         adminId: user.id, // O usuário logado será o admin do sindicato
         status: 'PENDING', // Novo sindicato sempre começa como PENDING
+        active: true, // Sindicatos criados pelo FENAFAR_ADMIN são ativos por padrão
       },
     })
 

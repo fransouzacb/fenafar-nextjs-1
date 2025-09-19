@@ -30,6 +30,7 @@ import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
 import { SindicatoForm } from '@/components/forms/sindicato-form'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { Tooltip } from '@/components/ui/tooltip'
 
 interface Sindicato {
   id: string
@@ -434,90 +435,94 @@ export default function SindicatosPage() {
 
                 {/* Action Buttons */}
                 <div className="pt-3 border-t border-gray-200">
-                  {/* Primeira linha - Ações principais */}
-                  <div className="flex gap-2 mb-2">
-                    {/* Visualizar */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setViewingSindicato(sindicato)}
-                      className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Ver</span>
-                    </Button>
+                  {/* Botões organizados em grupos lógicos */}
+                  <div className="space-y-2">
+                    {/* Primeira linha - Ações principais */}
+                    <div className="flex gap-2">
+                      <Tooltip content="Visualizar detalhes do sindicato" side="top">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setViewingSindicato(sindicato)}
+                          className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 justify-center"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Tooltip>
 
-                    {/* Editar */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingSindicato(sindicato)}
-                      className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Editar</span>
-                    </Button>
-                  </div>
+                      <Tooltip content="Editar informações do sindicato" side="top">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingSindicato(sindicato)}
+                          className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 justify-center"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Tooltip>
+                    </div>
 
-                  {/* Segunda linha - Ações de controle */}
-                  <div className="flex gap-2">
-                    {/* Bloquear/Desbloquear */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
-                      className={`flex-1 ${sindicato.active 
-                        ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
-                        : 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                      }`}
-                    >
-                      {sindicato.active ? (
+                    {/* Segunda linha - Controle de acesso */}
+                    <div className="flex gap-2">
+                      <Tooltip content={sindicato.active ? "Bloquear acesso do sindicato" : "Desbloquear acesso do sindicato"} side="top">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
+                          className={`flex-1 justify-center ${sindicato.active 
+                            ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
+                            : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                          }`}
+                        >
+                          {sindicato.active ? (
+                            <Lock className="h-4 w-4" />
+                          ) : (
+                            <Unlock className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </Tooltip>
+
+                      {/* Aprovar/Rejeitar/Excluir baseado no status */}
+                      {sindicato.status === 'PENDING' ? (
                         <>
-                          <Lock className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Bloquear</span>
+                          {/* Aprovar */}
+                          <Tooltip content="Aprovar sindicato" side="top">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openConfirmationDialog('approve', sindicato)}
+                              className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50 justify-center"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
+                          
+                          {/* Rejeitar */}
+                          <Tooltip content="Rejeitar sindicato" side="top">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openConfirmationDialog('reject', sindicato)}
+                              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 justify-center"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
                         </>
                       ) : (
-                        <>
-                          <Unlock className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Desbloquear</span>
-                        </>
+                        /* Excluir */
+                        <Tooltip content="Excluir sindicato permanentemente" side="top">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openConfirmationDialog('delete', sindicato)}
+                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 justify-center"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
                       )}
-                    </Button>
-
-                    {/* Aprovar/Rejeitar (apenas para PENDING) */}
-                    {sindicato.status === 'PENDING' ? (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog('approve', sindicato)}
-                          className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Aprovar</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog('reject', sindicato)}
-                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Rejeitar</span>
-                        </Button>
-                      </>
-                    ) : (
-                      /* Excluir */
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openConfirmationDialog('delete', sindicato)}
-                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        <span className="hidden sm:inline">Excluir</span>
-                      </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
 
