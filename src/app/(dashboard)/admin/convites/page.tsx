@@ -188,6 +188,7 @@ export default function ConvitesPage() {
 
   // Abrir diálogo de confirmação
   const openConfirmationDialog = (type: 'delete' | 'resend', convite: Convite) => {
+    console.log('🔧 Abrindo diálogo de confirmação:', { type, conviteId: convite.id })
     setConfirmationDialog({
       isOpen: true,
       type,
@@ -496,13 +497,21 @@ export default function ConvitesPage() {
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
+                            console.log('🟢 CLIQUE NO BOTÃO REENVIAR DETECTADO!', convite.id)
                             e.preventDefault()
                             e.stopPropagation()
                             console.log('Botão reenviar clicado para convite:', convite.id)
                             openConfirmationDialog('resend', convite)
                           }}
-                          className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-2"
+                          onMouseDown={(e) => {
+                            console.log('🟢 MOUSE DOWN no botão reenviar')
+                          }}
+                          onMouseUp={(e) => {
+                            console.log('🟢 MOUSE UP no botão reenviar')
+                          }}
+                          className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-2 cursor-pointer"
                           title="Reenviar convite"
+                          style={{ pointerEvents: 'auto', zIndex: 10 }}
                         >
                           <Send className="h-4 w-4 mr-1" />
                           <span className="text-xs">Reenviar</span>
@@ -514,13 +523,21 @@ export default function ConvitesPage() {
                         variant="outline"
                         size="sm"
                         onClick={(e) => {
+                          console.log('🔴 CLIQUE NO BOTÃO EXCLUIR DETECTADO!', convite.id)
                           e.preventDefault()
                           e.stopPropagation()
                           openConfirmationDialog('delete', convite)
                         }}
+                        onMouseDown={(e) => {
+                          console.log('🔴 MOUSE DOWN no botão excluir')
+                        }}
+                        onMouseUp={(e) => {
+                          console.log('🔴 MOUSE UP no botão excluir')
+                        }}
                         disabled={convite.usado}
-                        className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         title="Excluir convite"
+                        style={{ pointerEvents: 'auto', zIndex: 10 }}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
                         <span className="text-xs">Excluir</span>
@@ -690,7 +707,16 @@ export default function ConvitesPage() {
 
       {/* Diálogo de Confirmação */}
       <ConfirmationDialog
-        isOpen={confirmationDialog.isOpen}
+        open={confirmationDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmationDialog({
+              isOpen: false,
+              type: null,
+              convite: null
+            })
+          }
+        }}
         title={
           confirmationDialog.type === 'delete' 
             ? 'Excluir Convite' 
@@ -707,12 +733,8 @@ export default function ConvitesPage() {
             : 'Reenviar'
         }
         cancelText="Cancelar"
+        variant={confirmationDialog.type === 'delete' ? 'danger' : 'default'}
         onConfirm={handleConfirmAction}
-        onCancel={() => setConfirmationDialog({
-          isOpen: false,
-          type: null,
-          convite: null
-        })}
       />
     </div>
   )
