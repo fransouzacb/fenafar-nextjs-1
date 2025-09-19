@@ -5,7 +5,7 @@ import { UserRole } from '@prisma/client'
 // GET /api/sindicatos/[id] - Buscar sindicato por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authorization = request.headers.get('authorization')
@@ -59,9 +59,11 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+    
     // Buscar sindicato
     const sindicato = await prisma.sindicato.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         admin: {
           select: {
@@ -84,7 +86,7 @@ export async function GET(
     if (user.role === UserRole.FENAFAR_ADMIN) {
       // FENAFAR_ADMIN pode ver qualquer sindicato
       return NextResponse.json(sindicato)
-    } else if (user.role === UserRole.SINDICATO_ADMIN && user.sindicato?.id === params.id) {
+    } else if (user.role === UserRole.SINDICATO_ADMIN && user.sindicato?.id === id) {
       // SINDICATO_ADMIN pode ver apenas seu próprio sindicato
       return NextResponse.json(sindicato)
     } else {
@@ -106,7 +108,7 @@ export async function GET(
 // PUT /api/sindicatos/[id] - Atualizar sindicato
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authorization = request.headers.get('authorization')
@@ -162,7 +164,7 @@ export async function PUT(
 
     // Verificar se sindicato existe
     const existingSindicato = await prisma.sindicato.findUnique({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     if (!existingSindicato) {
@@ -174,7 +176,7 @@ export async function PUT(
 
     // Verificar permissões
     if (user.role !== UserRole.FENAFAR_ADMIN && 
-        (user.role !== UserRole.SINDICATO_ADMIN || user.sindicato?.id !== params.id)) {
+        (user.role !== UserRole.SINDICATO_ADMIN || user.sindicato?.id !== (await params).id)) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }
@@ -184,16 +186,19 @@ export async function PUT(
     const body = await request.json()
     const { name, cnpj, address, city, state, zipCode, phone, email, website, description, active } = body
 
-    // Validações básicas
-    if (!name || !cnpj || !email) {
+    // Se for apenas uma atualização de status (active), não validar campos obrigatórios
+    const isStatusUpdate = Object.keys(body).length === 1 && body.hasOwnProperty('active')
+    
+    // Validações básicas apenas se não for atualização de status
+    if (!isStatusUpdate && (!name || !cnpj || !email)) {
       return NextResponse.json(
         { error: 'Nome, CNPJ e email são obrigatórios' },
         { status: 400 }
       )
     }
 
-    // Verificar se CNPJ já existe em outro sindicato
-    if (cnpj !== existingSindicato.cnpj) {
+    // Verificar se CNPJ já existe em outro sindicato (apenas se CNPJ foi alterado)
+    if (!isStatusUpdate && cnpj && cnpj !== existingSindicato.cnpj) {
       const cnpjExists = await prisma.sindicato.findUnique({
         where: { cnpj }
       })
@@ -208,7 +213,7 @@ export async function PUT(
 
     // Atualizar sindicato
     const sindicato = await prisma.sindicato.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         name,
         cnpj,
@@ -247,7 +252,7 @@ export async function PUT(
 // DELETE /api/sindicatos/[id] - Excluir sindicato
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authorization = request.headers.get('authorization')
@@ -309,7 +314,7 @@ export async function DELETE(
 
     // Verificar se sindicato existe
     const existingSindicato = await prisma.sindicato.findUnique({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     if (!existingSindicato) {
@@ -321,7 +326,7 @@ export async function DELETE(
 
     // Excluir sindicato
     await prisma.sindicato.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     return NextResponse.json({ message: 'Sindicato excluído com sucesso' })

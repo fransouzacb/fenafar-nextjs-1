@@ -389,7 +389,7 @@ export default function SindicatosPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
                   {sindicato.email && (
                     <div className="flex items-center text-sm text-gray-600">
@@ -434,86 +434,90 @@ export default function SindicatosPage() {
 
                 {/* Action Buttons */}
                 <div className="pt-3 border-t border-gray-200">
-                  <div className="flex flex-wrap gap-2">
+                  {/* Primeira linha - Ações principais */}
+                  <div className="flex gap-2 mb-2">
                     {/* Visualizar */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setViewingSindicato(sindicato)}
-                      className="flex-1 min-w-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     >
-                      <Eye className="h-4 w-4 mr-1" />
+                      <Eye className="h-4 w-4 mr-2" />
                       <span className="hidden sm:inline">Ver</span>
                     </Button>
-
-                    {/* Bloquear/Desbloquear */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
-                      className={`flex-1 min-w-0 ${sindicato.active 
-                        ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
-                        : 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                      }`}
-                    >
-                      {sindicato.active ? (
-                        <>
-                          <Lock className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Bloquear</span>
-                        </>
-                      ) : (
-                        <>
-                          <Unlock className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Desbloquear</span>
-                        </>
-                      )}
-                    </Button>
-
-                    {/* Aprovar/Rejeitar (apenas para PENDING) */}
-                    {sindicato.status === 'PENDING' && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog('approve', sindicato)}
-                          className="flex-1 min-w-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Aprovar</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog('reject', sindicato)}
-                          className="flex-1 min-w-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Rejeitar</span>
-                        </Button>
-                      </>
-                    )}
 
                     {/* Editar */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingSindicato(sindicato)}
-                      className="flex-1 min-w-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
+                      <Edit className="h-4 w-4 mr-2" />
                       <span className="hidden sm:inline">Editar</span>
                     </Button>
+                  </div>
 
-                    {/* Excluir */}
+                  {/* Segunda linha - Ações de controle */}
+                  <div className="flex gap-2">
+                    {/* Bloquear/Desbloquear */}
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => openConfirmationDialog('delete', sindicato)}
-                      className="flex-1 min-w-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
+                      className={`flex-1 ${sindicato.active 
+                        ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
+                        : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                      }`}
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Excluir</span>
+                      {sindicato.active ? (
+                        <>
+                          <Lock className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Bloquear</span>
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Desbloquear</span>
+                        </>
+                      )}
                     </Button>
+
+                    {/* Aprovar/Rejeitar (apenas para PENDING) */}
+                    {sindicato.status === 'PENDING' ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openConfirmationDialog('approve', sindicato)}
+                          className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Aprovar</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openConfirmationDialog('reject', sindicato)}
+                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Rejeitar</span>
+                        </Button>
+                      </>
+                    ) : (
+                      /* Excluir */
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openConfirmationDialog('delete', sindicato)}
+                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        <span className="hidden sm:inline">Excluir</span>
+                      </Button>
+                    )}
                   </div>
                 </div>
 
