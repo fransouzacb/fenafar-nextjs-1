@@ -1,0 +1,20 @@
+# Scripts de desenvolvimento local
+scripts/
+
+# Arquivos de desenvolvimento
+*.sql
+*.mjs
+check-data.mjs
+sindicatos_rows.sql
+cookies.txt
+
+# Documentação
+docs/
+
+# Logs
+*.log
+erros_no_navegador.md
+
+# Arquivos temporários
+*.tmp
+*.temp
