@@ -145,7 +145,7 @@ async function createSimpleData() {
     const documentos = []
     for (const sindicato of sindicatos) {
       const docs = await Promise.all([
-        prisma.documento.create({
+        (prisma as any).documento.create({
           data: {
             titulo: 'Estatuto Social',
             tipo: 'OUTRO',
@@ -156,7 +156,7 @@ async function createSimpleData() {
             ativo: true
           }
         }),
-        prisma.documento.create({
+        (prisma as any).documento.create({
           data: {
             titulo: 'CCT 2024',
             tipo: 'CCT',
