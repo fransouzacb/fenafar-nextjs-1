@@ -447,7 +447,7 @@ export default function ConvitesPage() {
                     {/* Grid de botões centralizados */}
                     <div className="grid grid-cols-3 gap-2">
                       {/* Visualizar */}
-                      <Tooltip content="Visualizar detalhes" side="top">
+                      <div className="relative group">
                         <Button
                           variant="outline"
                           size="sm"
@@ -456,10 +456,14 @@ export default function ConvitesPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                      </Tooltip>
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                          Visualizar detalhes
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                        </div>
+                      </div>
 
                       {/* Editar */}
-                      <Tooltip content="Editar convite" side="top">
+                      <div className="relative group">
                         <Button
                           variant="outline"
                           size="sm"
@@ -469,12 +473,16 @@ export default function ConvitesPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                      </Tooltip>
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                          Editar convite
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                        </div>
+                      </div>
 
                       {/* Reenviar/Excluir baseado no status */}
                       {!convite.usado && new Date(convite.expiresAt) >= new Date() ? (
                         /* Reenviar */
-                        <Tooltip content="Reenviar convite" side="top">
+                        <div className="relative group">
                           <Button
                             variant="outline"
                             size="sm"
@@ -483,10 +491,14 @@ export default function ConvitesPage() {
                           >
                             <Send className="h-4 w-4" />
                           </Button>
-                        </Tooltip>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                            Reenviar convite
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                          </div>
+                        </div>
                       ) : (
                         /* Excluir */
-                        <Tooltip content="Excluir convite" side="top">
+                        <div className="relative group">
                           <Button
                             variant="outline"
                             size="sm"
@@ -496,7 +508,11 @@ export default function ConvitesPage() {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </Tooltip>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                            Excluir convite
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
