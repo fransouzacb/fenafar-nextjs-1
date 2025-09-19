@@ -59,6 +59,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { token } = await params
     const data = await request.json()
     const { user: userData, sindicato: sindicatoData } = data
+    
+    console.log('📋 Dados recebidos para aceitar convite:', { userData, sindicatoData })
 
     if (!token) {
       return NextResponse.json(
@@ -110,19 +112,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Hash da senha
-    const hashedPassword = await bcrypt.hash(userData.password, 12)
+    // Hash da senha (não usado no schema atual, mas mantido para futuras implementações)
+    // const hashedPassword = await bcrypt.hash(userData.password, 12)
 
     // Iniciar transação
     const result = await prisma.$transaction(async (tx) => {
-      // Criar usuário (sem campo password que não existe no schema)
+      // Criar usuário (apenas campos que existem no schema)
       const newUser = await tx.user.create({
         data: {
           name: userData.name,
           email: userData.email,
           role: convite.role,
-          cpf: userData.cpf || null,
-          cargo: userData.cargo || null,
           active: true
         }
       })
