@@ -261,7 +261,7 @@ export default function EmailTemplatesPage() {
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Settings className="h-4 w-4 mr-2" />
-                    Criado por {template.createdBy.name}
+                    Criado por {template.createdBy?.name || 'Usuário não encontrado'}
                   </div>
                 </div>
 

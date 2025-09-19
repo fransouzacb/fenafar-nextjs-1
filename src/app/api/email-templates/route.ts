@@ -27,6 +27,15 @@ export async function GET(request: NextRequest) {
 
     // Buscar templates do banco de dados
     const templates = await prisma.emailTemplate.findMany({
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
       orderBy: {
         createdAt: 'desc'
       }
