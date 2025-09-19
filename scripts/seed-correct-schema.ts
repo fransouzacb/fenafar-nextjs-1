@@ -96,7 +96,6 @@ async function cleanAll() {
   // Limpar banco de dados
   await prisma.convite.deleteMany()
   await prisma.documento.deleteMany()
-  await prisma.membro.deleteMany()
   await prisma.sindicato.deleteMany()
   await prisma.user.deleteMany()
   
@@ -220,48 +219,49 @@ async function createSindicatos(users: any[]) {
   return createdSindicatos
 }
 
-async function createMembros(users: any[], sindicatos: any[]) {
-  console.log('👥 Criando membros de teste...')
-  
-  if (sindicatos.length === 0) {
-    console.error('❌ Nenhum sindicato encontrado para associar membros!')
-    return []
-  }
-  
-  const members = users.filter(u => u.role === 'MEMBER')
-  const createdMembros = []
-  
-  console.log(`📋 Membros para criar: ${members.length}`)
-  
-  for (let i = 0; i < members.length; i++) {
-    const memberData = members[i]
-    const sindicato = sindicatos[i % sindicatos.length] // Distribuir entre sindicatos
-    
-    try {
-      const membro = await prisma.membro.create({
-        data: {
-          nome: memberData.name,
-          cpf: `${String(111 + i).padStart(3, '0')}.${String(222 + i).padStart(3, '0')}.${String(333 + i).padStart(3, '0')}-${String(10 + i).padStart(2, '0')}`,
-          email: memberData.email,
-          telefone: memberData.phone,
-          cargo: i === 0 ? 'Farmacêutico Responsável' : i === 1 ? 'Técnico em Farmácia' : 'Auxiliar de Farmácia',
-          ativo: true,
-          userId: memberData.id,
-          sindicatoId: sindicato.id
-        }
-      })
-
-      createdMembros.push(membro)
-      console.log(`✅ Membro criado: ${memberData.name}`)
-      
-    } catch (error) {
-      console.error(`❌ Erro ao criar membro ${memberData.name}:`, error)
-    }
-  }
-  
-  console.log(`📊 Total de membros criados: ${createdMembros.length}`)
-  return createdMembros
-}
+// Função removida - modelo membro não existe mais
+// async function createMembros(users: any[], sindicatos: any[]) {
+//   console.log('👥 Criando membros de teste...')
+//   
+//   if (sindicatos.length === 0) {
+//     console.error('❌ Nenhum sindicato encontrado para associar membros!')
+//     return []
+//   }
+//   
+//   const members = users.filter(u => u.role === 'MEMBER')
+//   const createdMembros = []
+//   
+//   console.log(`📋 Membros para criar: ${members.length}`)
+//   
+//   for (let i = 0; i < members.length; i++) {
+//     const memberData = members[i]
+//     const sindicato = sindicatos[i % sindicatos.length] // Distribuir entre sindicatos
+//     
+//     try {
+//       const membro = await prisma.membro.create({
+//         data: {
+//           nome: memberData.name,
+//           cpf: `${String(111 + i).padStart(3, '0')}.${String(222 + i).padStart(3, '0')}.${String(333 + i).padStart(3, '0')}-${String(10 + i).padStart(2, '0')}`,
+//           email: memberData.email,
+//           telefone: memberData.phone,
+//           cargo: i === 0 ? 'Farmacêutico Responsável' : i === 1 ? 'Técnico em Farmácia' : 'Auxiliar de Farmácia',
+//           ativo: true,
+//           userId: memberData.id,
+//           sindicatoId: sindicato.id
+//         }
+//       })
+//
+//       createdMembros.push(membro)
+//       console.log(`✅ Membro criado: ${memberData.name}`)
+//       
+//     } catch (error) {
+//       console.error(`❌ Erro ao criar membro ${memberData.name}:`, error)
+//     }
+//   }
+//   
+//   console.log(`📊 Total de membros criados: ${createdMembros.length}`)
+//   return createdMembros
+// }
 
 async function createDocumentos(sindicatos: any[], membros: any[]) {
   console.log('📄 Criando documentos de teste...')
@@ -383,14 +383,14 @@ async function main() {
     }
     
     const sindicatos = await createSindicatos(users)
-    const membros = await createMembros(users, sindicatos)
-    const documentos = await createDocumentos(sindicatos, membros)
+    // const membros = await createMembros(users, sindicatos) // Função removida
+    const documentos = await createDocumentos(sindicatos, []) // Array vazio pois membros não existem mais
     const convites = await createConvites()
 
     console.log('\n📊 RESUMO DOS DADOS CRIADOS:')
     console.log(`👤 Usuários: ${users.length}`)
     console.log(`🏢 Sindicatos: ${sindicatos.length}`)
-    console.log(`👥 Membros: ${membros.length}`)
+    console.log(`👥 Membros: 0`) // Modelo membro foi removido
     console.log(`📄 Documentos: ${documentos.length}`)
     console.log(`📧 Convites: ${convites.length}`)
 

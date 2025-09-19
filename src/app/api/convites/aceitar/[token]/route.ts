@@ -4,6 +4,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
+interface RouteParams {
+  params: Promise<{ token: string }>
+}
+
 // GET /api/convites/aceitar/[token] - Verificar convite
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {

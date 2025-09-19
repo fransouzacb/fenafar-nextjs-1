@@ -432,16 +432,20 @@ export default function EmailTemplatesPage() {
 
       {/* Diálogo de Confirmação */}
       <ConfirmationDialog
-        isOpen={confirmationDialog.isOpen}
+        open={confirmationDialog.isOpen}
         title="Excluir Template"
         description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
         confirmText="Excluir"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setConfirmationDialog({
-          isOpen: false,
-          template: null
-        })}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmationDialog({
+              isOpen: false,
+              template: null
+            })
+          }
+        }}
       />
     </div>
   )

@@ -101,9 +101,10 @@ async function main() {
           data: {
             email: 'convidado1@teste.com',
             role: 'MEMBER',
-            invitedBy: admin.id,
+            token: 'token-simple-123',
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            active: true
+            usado: false,
+            criadoPorId: admin.id
           }
         })
         console.log('✅ Convite criado')

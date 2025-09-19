@@ -62,7 +62,6 @@ async function main() {
           email: 'contato@sindicatosp.com',
           city: 'São Paulo',
           state: 'SP',
-          active: true
         },
         create: {
           name: 'Sindicato dos Farmacêuticos de São Paulo',
@@ -70,7 +69,11 @@ async function main() {
           email: 'contato@sindicatosp.com',
           city: 'São Paulo',
           state: 'SP',
-          active: true
+          admin: {
+            connect: {
+              id: 'sindicato-001'
+            }
+          }
         }
       })
       console.log('✅ Sindicato criado')
@@ -88,7 +91,12 @@ async function main() {
           tipo: 'OUTRO',
           arquivo: 'https://example.com/estatuto.pdf',
           versao: '1.0',
-          ativo: true
+          ativo: true,
+          sindicato: {
+            connect: {
+              id: 'sindicato-001'
+            }
+          }
         }
       })
       console.log('✅ Documento criado')
@@ -103,9 +111,14 @@ async function main() {
       await prisma.convite.create({
         data: {
           email: 'convidado1@teste.com',
+          token: 'token-minimal-1',
           role: 'MEMBER',
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          active: true
+          criadoPor: {
+            connect: {
+              id: 'admin-001'
+            }
+          }
         }
       })
       console.log('✅ Convite criado')

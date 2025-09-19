@@ -53,26 +53,24 @@ async function checkData() {
     })
     console.log(`  Total: ${sindicatos.length}\n`)
     
-    // Verificar membros
-    const membros = await prisma.membro.findMany({
+    // Verificar usuários (membros são usuários com role MEMBER)
+    const usuarios = await prisma.user.findMany({
+      where: {
+        role: 'MEMBER'
+      },
       select: {
         id: true,
-        nome: true,
+        name: true,
         email: true,
-        cargo: true,
-        sindicato: {
-          select: {
-            name: true
-          }
-        }
+        cargo: true
       }
     })
     
-    console.log('👥 MEMBROS:')
-    membros.forEach(membro => {
-      console.log(`  - ${membro.nome} (${membro.cargo}) - ${membro.sindicato.name}`)
+    console.log('👥 USUÁRIOS MEMBER:')
+    usuarios.forEach(usuario => {
+      console.log(`  - ${usuario.name} (${usuario.email}) - ${usuario.cargo || 'Sem cargo'}`)
     })
-    console.log(`  Total: ${membros.length}\n`)
+    console.log(`  Total: ${usuarios.length}\n`)
     
     // Verificar documentos
     const documentos = await prisma.documento.findMany({

@@ -10,6 +10,8 @@ export interface User {
   active: boolean
   createdAt: Date
   updatedAt: Date
+  cargo: string | null
+  cpf: string | null
   sindicato?: {
     id: string
     name: string
@@ -18,15 +20,13 @@ export interface User {
   } | null
 }
 
-export type AuthUser = User
-
 export interface LoginRequest {
   email: string
   password: string
 }
 
 export interface LoginResponse {
-  user: AuthUser
+  user: User
   accessToken: string
   refreshToken: string
 }
@@ -36,19 +36,21 @@ export interface RegisterRequest {
   password: string
   name: string
   phone?: string
+  cpf?: string
+  cargo?: string
 }
 
 export interface AuthState {
-  user: AuthUser | null
+  user: User | null
   isLoading: boolean
   isAuthenticated: boolean
 }
 
 export interface AuthContextType extends AuthState {
-  login: (credentials: LoginRequest) => Promise<void>
+  login: (credentials: LoginRequest) => Promise<{ user: User } | undefined>
   logout: () => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
-  refreshToken: () => Promise<void>
+  refreshToken: () => Promise<string | undefined>
   updateProfile: (data: Partial<User>) => Promise<void>
 }
 

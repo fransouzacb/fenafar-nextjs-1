@@ -75,7 +75,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           onSuccess()
         } else {
           // Redirecionar baseado na role do usuário
-          const userRole = result?.user?.role || 'FENAFAR_ADMIN'
+          const userRole = (result as any)?.user?.role || 'FENAFAR_ADMIN'
           const redirectPath = redirectTo || getRedirectPath(userRole)
           router.push(redirectPath)
         }

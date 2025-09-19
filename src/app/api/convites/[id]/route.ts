@@ -7,7 +7,7 @@ import { sendConviteEmail } from '@/lib/email'
 // GET /api/convites/[id] - Buscar convite específico
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getAuthUser(request)
@@ -27,7 +27,7 @@ export async function GET(
     }
 
     const convite = await prisma.convite.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         sindicato: {
           select: {
@@ -66,7 +66,7 @@ export async function GET(
 // PUT /api/convites/[id] - Atualizar convite
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getAuthUser(request)
@@ -88,7 +88,7 @@ export async function PUT(
     const data = await request.json()
 
     const updatedConvite = await prisma.convite.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data,
       include: {
         sindicato: {
@@ -127,7 +127,7 @@ export async function PUT(
 // DELETE /api/convites/[id] - Excluir convite
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getAuthUser(request)
@@ -147,7 +147,7 @@ export async function DELETE(
     }
 
     await prisma.convite.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     return NextResponse.json({ message: 'Convite excluído com sucesso' })
@@ -169,7 +169,7 @@ export async function DELETE(
 // PATCH /api/convites/[id]/resend - Reenviar convite
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getAuthUser(request)
@@ -190,7 +190,7 @@ export async function PATCH(
 
     // Buscar o convite existente
     const convite = await prisma.convite.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         sindicato: {
           select: {
@@ -249,8 +249,8 @@ export async function PATCH(
         linkConvite,
         expiraEm,
         criadoPor: convite.criadoPor?.name || convite.criadoPor?.email || 'Administrador',
-        maxMembers: convite.maxMembers,
-        tipoConvite: convite.role
+        maxMembers: convite.maxMembers || undefined,
+        tipoConvite: convite.role as 'SINDICATO_ADMIN' | 'MEMBER'
       })
 
       console.log('📧 Resultado do reenvio:', emailResult)

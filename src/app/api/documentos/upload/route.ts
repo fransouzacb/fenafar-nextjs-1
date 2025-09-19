@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o usuário tem permissão para upload
-    if (![UserRole.SINDICATO_ADMIN, UserRole.MEMBER].includes(user.role)) {
+    if (user.role !== UserRole.FENAFAR_ADMIN && user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }

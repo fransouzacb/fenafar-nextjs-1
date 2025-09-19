@@ -20,7 +20,6 @@ async function createSimpleData() {
           email: 'admin@fenafar.com.br',
           name: 'Admin FENAFAR',
           role: 'FENAFAR_ADMIN',
-          active: true,
           emailConfirmed: true
         }
       }),
@@ -32,7 +31,6 @@ async function createSimpleData() {
           email: 'sindicato1@teste.com',
           name: 'João Silva',
           role: 'SINDICATO_ADMIN',
-          active: true,
           emailConfirmed: true
         }
       }),
@@ -44,7 +42,6 @@ async function createSimpleData() {
           email: 'sindicato2@teste.com',
           name: 'Maria Santos',
           role: 'SINDICATO_ADMIN',
-          active: true,
           emailConfirmed: true
         }
       }),
@@ -56,7 +53,6 @@ async function createSimpleData() {
           email: 'membro1@teste.com',
           name: 'Carlos Oliveira',
           role: 'MEMBER',
-          active: true,
           emailConfirmed: true
         }
       }),
@@ -68,7 +64,6 @@ async function createSimpleData() {
           email: 'membro2@teste.com',
           name: 'Ana Costa',
           role: 'MEMBER',
-          active: true,
           emailConfirmed: true
         }
       }),
@@ -80,7 +75,6 @@ async function createSimpleData() {
           email: 'membro3@teste.com',
           name: 'Pedro Silva',
           role: 'MEMBER',
-          active: true,
           emailConfirmed: true
         }
       })
@@ -102,7 +96,6 @@ async function createSimpleData() {
           zipCode: '01234-567',
           phone: '(11) 3333-4444',
           email: 'contato@sindicatosp.com.br',
-          active: true,
           admin: {
             connect: { id: users[1].id } // João Silva
           }
@@ -120,7 +113,6 @@ async function createSimpleData() {
           zipCode: '22000-000',
           phone: '(21) 2222-3333',
           email: 'contato@sindicatorj.com.br',
-          active: true,
           admin: {
             connect: { id: users[2].id } // Maria Santos
           }
@@ -132,18 +124,19 @@ async function createSimpleData() {
     // 3. Associar membros aos sindicatos
     console.log('\n👥 Associando membros aos sindicatos...')
     await Promise.all([
-      prisma.user.update({
-        where: { id: users[3].id }, // Carlos
-        data: { sindicatoId: sindicatos[0].id }
-      }),
-      prisma.user.update({
-        where: { id: users[4].id }, // Ana
-        data: { sindicatoId: sindicatos[0].id }
-      }),
-      prisma.user.update({
-        where: { id: users[5].id }, // Pedro
-        data: { sindicatoId: sindicatos[1].id }
-      })
+      // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
+      // prisma.user.update({
+      //   where: { id: users[3].id }, // Carlos
+      //   data: { sindicatoId: sindicatos[0].id }
+      // }),
+      // prisma.user.update({
+      //   where: { id: users[4].id }, // Ana
+      //   data: { sindicatoId: sindicatos[0].id }
+      // }),
+      // prisma.user.update({
+      //   where: { id: users[5].id }, // Pedro
+      //   data: { sindicatoId: sindicatos[1].id }
+      // })
     ])
     console.log('✅ Membros associados aos sindicatos')
 
@@ -154,26 +147,24 @@ async function createSimpleData() {
       const docs = await Promise.all([
         prisma.documento.create({
           data: {
-            name: 'Estatuto Social',
+            titulo: 'Estatuto Social',
             tipo: 'OUTRO',
-            description: 'Estatuto social do sindicato',
-            fileUrl: 'https://example.com/estatuto.pdf',
-            fileSize: 1024000,
+            arquivo: 'https://example.com/estatuto.pdf',
+            tamanho: 1024000,
             mimeType: 'application/pdf',
             sindicatoId: sindicato.id,
-            active: true
+            ativo: true
           }
         }),
         prisma.documento.create({
           data: {
-            name: 'CCT 2024',
+            titulo: 'CCT 2024',
             tipo: 'CCT',
-            description: 'Convenção Coletiva de Trabalho 2024',
-            fileUrl: 'https://example.com/cct2024.pdf',
-            fileSize: 2048000,
+            arquivo: 'https://example.com/cct2024.pdf',
+            tamanho: 2048000,
             mimeType: 'application/pdf',
             sindicatoId: sindicato.id,
-            active: true
+            ativo: true
           }
         })
       ])
@@ -187,21 +178,21 @@ async function createSimpleData() {
       prisma.convite.create({
         data: {
           email: 'novo1@exemplo.com',
+          token: 'token-exemplo-1',
           role: 'MEMBER',
           sindicatoId: sindicatos[0].id,
-          invitedBy: users[0].id, // Admin FENAFAR
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          active: true
+          criadoPorId: users[0].id, // Admin FENAFAR
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         }
       }),
       prisma.convite.create({
         data: {
           email: 'novo2@exemplo.com',
+          token: 'token-exemplo-2',
           role: 'MEMBER',
           sindicatoId: sindicatos[1].id,
-          invitedBy: users[0].id, // Admin FENAFAR
+           criadoPorId: users[0].id, // Admin FENAFAR
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          active: true
         }
       })
     ])
