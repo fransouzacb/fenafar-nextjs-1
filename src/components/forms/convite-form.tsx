@@ -14,6 +14,8 @@ interface ConviteFormData {
   role: 'SINDICATO_ADMIN' | 'MEMBER'
   sindicatoId?: string
   maxMembers?: number | null
+  cpf?: string  // Obrigatório para SINDICATO_ADMIN
+  cargo?: string  // Obrigatório para SINDICATO_ADMIN
 }
 
 interface Sindicato {
@@ -90,6 +92,16 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
     // Para SINDICATO_ADMIN: deve definir limite de membros (para o novo sindicato)
     if (formData.role === 'SINDICATO_ADMIN' && (!formData.maxMembers || formData.maxMembers <= 0)) {
       newErrors.maxMembers = 'Limite de membros é obrigatório para admin de sindicato'
+    }
+
+    // Para SINDICATO_ADMIN: CPF e Cargo são obrigatórios
+    if (formData.role === 'SINDICATO_ADMIN') {
+      if (!formData.cpf || formData.cpf.trim().length === 0) {
+        newErrors.cpf = 'CPF é obrigatório para administrador de sindicato'
+      }
+      if (!formData.cargo || formData.cargo.trim().length === 0) {
+        newErrors.cargo = 'Cargo é obrigatório para administrador de sindicato'
+      }
     }
 
     setErrors(newErrors)
@@ -222,6 +234,51 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
                 <p className="text-sm text-red-500">{errors.role}</p>
               )}
             </div>
+
+            {/* CPF e Cargo (apenas para SINDICATO_ADMIN) */}
+            {formData.role === 'SINDICATO_ADMIN' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* CPF */}
+                  <div className="space-y-2">
+                    <Label htmlFor="cpf">CPF *</Label>
+                    <Input
+                      id="cpf"
+                      type="text"
+                      value={formData.cpf || ''}
+                      onChange={(e) => handleChange('cpf', e.target.value)}
+                      placeholder="000.000.000-00"
+                      className={errors.cpf ? 'border-red-500' : ''}
+                    />
+                    <p className="text-xs text-gray-500">
+                      CPF do administrador do sindicato (obrigatório)
+                    </p>
+                    {errors.cpf && (
+                      <p className="text-sm text-red-500">{errors.cpf}</p>
+                    )}
+                  </div>
+
+                  {/* Cargo */}
+                  <div className="space-y-2">
+                    <Label htmlFor="cargo">Cargo *</Label>
+                    <Input
+                      id="cargo"
+                      type="text"
+                      value={formData.cargo || ''}
+                      onChange={(e) => handleChange('cargo', e.target.value)}
+                      placeholder="Ex: Presidente, Secretário"
+                      className={errors.cargo ? 'border-red-500' : ''}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Cargo/função no sindicato (obrigatório)
+                    </p>
+                    {errors.cargo && (
+                      <p className="text-sm text-red-500">{errors.cargo}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Sindicato (apenas para MEMBER) */}
             {formData.role === 'MEMBER' && (

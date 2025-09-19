@@ -15,6 +15,8 @@ model User {
   email         String    @unique
   name          String?
   phone         String?
+  cpf           String?   // CPF para auditoria sindical (opcional para MEMBER, obrigatório para SINDICATO_ADMIN)
+  cargo         String?   // Cargo/função no sindicato (opcional para MEMBER, obrigatório para SINDICATO_ADMIN)
   role          UserRole  @default(MEMBER)
   emailConfirmed Boolean  @default(false)
   active        Boolean   @default(true)

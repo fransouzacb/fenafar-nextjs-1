@@ -117,12 +117,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Iniciar transação
     const result = await prisma.$transaction(async (tx) => {
-      // Criar usuário (apenas campos que existem no schema)
+      // Criar usuário com campos completos
       const newUser = await tx.user.create({
         data: {
           name: userData.name,
           email: userData.email,
           role: convite.role,
+          cpf: userData.cpf || null,
+          cargo: userData.cargo || null,
           active: true
         }
       })
