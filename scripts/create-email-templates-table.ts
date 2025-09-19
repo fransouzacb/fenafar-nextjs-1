@@ -77,7 +77,7 @@ async function createEmailTemplatesTable() {
 
     // Template para convite de sindicato
     try {
-      await prisma.emailTemplate.create({
+      await (prisma as any).emailTemplate.create({
       data: {
         name: 'Convite para Admin de Sindicato',
         subject: 'Convite para Administrar Sindicato - FENAFAR',
@@ -171,7 +171,7 @@ async function createEmailTemplatesTable() {
 
     // Template para convite de membro
     try {
-      await prisma.emailTemplate.create({
+      await (prisma as any).emailTemplate.create({
       data: {
         name: 'Convite para Membro',
         subject: 'Convite para Participar do Sindicato - FENAFAR',
