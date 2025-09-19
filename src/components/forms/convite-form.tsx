@@ -13,7 +13,7 @@ interface ConviteFormData {
   email: string
   role: 'SINDICATO_ADMIN' | 'MEMBER'
   sindicatoId?: string
-  maxMembers?: number
+  maxMembers?: number | null
 }
 
 interface Sindicato {

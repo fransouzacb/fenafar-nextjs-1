@@ -4,9 +4,9 @@ import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 // GET /api/convites/aceitar/[token] - Verificar convite
-export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { token } = params
+    const { token } = await params
 
     if (!token) {
       return NextResponse.json(
@@ -54,9 +54,9 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
 }
 
 // POST /api/convites/aceitar/[token] - Aceitar convite
-export async function POST(request: NextRequest, { params }: { params: { token: string } }) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const { token } = params
+    const { token } = await params
     const data = await request.json()
     const { user: userData, sindicato: sindicatoData } = data
 
@@ -115,12 +115,11 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
 
     // Iniciar transação
     const result = await prisma.$transaction(async (tx) => {
-      // Criar usuário
+      // Criar usuário (sem campo password que não existe no schema)
       const newUser = await tx.user.create({
         data: {
           name: userData.name,
           email: userData.email,
-          password: hashedPassword,
           role: convite.role,
           cpf: userData.cpf || null,
           cargo: userData.cargo || null,

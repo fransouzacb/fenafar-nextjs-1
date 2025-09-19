@@ -219,30 +219,27 @@ export default function ConvitesPage() {
           break
 
         case 'resend':
-          // Reenviar convite criando um novo com os mesmos dados
-          const resendData = {
-            email: convite.email,
-            role: convite.role,
-            sindicatoId: convite.sindicatoId,
-            maxMembers: convite.maxMembers
-          }
+          // Reenviar e-mail do convite existente
+          console.log('🔄 Reenviando convite:', convite)
           
-          console.log('Dados do reenvio:', resendData)
-          
-          response = await fetch('/api/convites', {
-            method: 'POST',
-            credentials: 'include', // Usar cookies para autenticação
+          response = await fetch(`/api/convites/${convite.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(resendData)
+            }
           })
           
-          console.log('Resposta do reenvio:', response.status, response.ok)
+          console.log('📧 Resposta do reenvio:', response.status, response.ok)
           
           if (response.ok) {
             const responseData = await response.json()
-            console.log('Dados da resposta:', responseData)
+            console.log('✅ Dados da resposta:', responseData)
+            toast.success('Convite reenviado com sucesso!')
+          } else {
+            const errorData = await response.json()
+            console.error('❌ Erro no reenvio:', errorData)
+            toast.error(errorData.error || 'Erro ao reenviar convite')
           }
           
           successMessage = 'Convite reenviado com sucesso!'
@@ -258,7 +255,10 @@ export default function ConvitesPage() {
       }
 
       toast.success(successMessage)
-      await loadConvites()
+      // Recarregar lista apenas para delete (reenvio não cria novo convite)
+      if (confirmationDialog.type === 'delete') {
+        await loadConvites()
+      }
     } catch (error) {
       console.error('Erro na operação:', error)
       toast.error(error instanceof Error ? error.message : 'Erro na operação')
@@ -576,7 +576,6 @@ export default function ConvitesPage() {
       {/* Formulários */}
       {showCreateForm && (
         <ConviteForm
-          sindicatos={sindicatos}
           onClose={() => setShowCreateForm(false)}
           onSuccess={() => {
             setShowCreateForm(false)
@@ -588,7 +587,6 @@ export default function ConvitesPage() {
       {editingConvite && (
         <ConviteForm
           convite={editingConvite}
-          sindicatos={sindicatos}
           onClose={() => setEditingConvite(null)}
           onSuccess={() => {
             setEditingConvite(null)
