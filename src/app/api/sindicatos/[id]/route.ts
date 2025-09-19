@@ -47,7 +47,9 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true, sindicatoId: true }
+      select: { role: true, sindicato: {
+          select: { id: true }
+        } }
     })
 
     if (!user) {
@@ -80,7 +82,7 @@ export async function GET(
     if (user.role === UserRole.FENAFAR_ADMIN) {
       // FENAFAR_ADMIN pode ver qualquer sindicato
       return NextResponse.json(sindicato)
-    } else if (user.role === UserRole.SINDICATO_ADMIN && user.sindicatoId === params.id) {
+    } else if (user.role === UserRole.SINDICATO_ADMIN && user.sindicato?.id === params.id) {
       // SINDICATO_ADMIN pode ver apenas seu próprio sindicato
       return NextResponse.json(sindicato)
     } else {
@@ -144,7 +146,9 @@ export async function PUT(
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true, sindicatoId: true }
+      select: { role: true, sindicato: {
+          select: { id: true }
+        } }
     })
 
     if (!user) {
@@ -168,7 +172,7 @@ export async function PUT(
 
     // Verificar permissões
     if (user.role !== UserRole.FENAFAR_ADMIN && 
-        (user.role !== UserRole.SINDICATO_ADMIN || user.sindicatoId !== params.id)) {
+        (user.role !== UserRole.SINDICATO_ADMIN || user.sindicato?.id !== params.id)) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }

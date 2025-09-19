@@ -1,58 +1,129 @@
-import { prisma } from '../src/lib/prisma'
+#!/usr/bin/env tsx
+
+/**
+ * Script para Verificar Dados
+ * 
+ * Este script verifica se os dados foram criados corretamente
+ */
+
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 async function checkData() {
+  console.log('🔍 Verificando dados no banco...\n')
+  
   try {
-    console.log('🔍 Verificando dados no banco...\n')
-
-    const users = await prisma.user.count()
-    console.log(`👤 Users: ${users}`)
-
-    const sindicatos = await prisma.sindicato.count()
-    console.log(`🏢 Sindicatos: ${sindicatos}`)
-
-    const documentos = await prisma.documento.count()
-    console.log(`📄 Documentos: ${documentos}`)
-
-    const convites = await prisma.convite.count()
-    console.log(`📧 Convites: ${convites}`)
-
-    // Verificar se temos usuários com dados específicos
-    const usersWithDetails = await prisma.user.findMany({
+    // Verificar usuários
+    const users = await prisma.user.findMany({
       select: {
         id: true,
         email: true,
         name: true,
-        active: true,
         role: true,
+        active: true
       }
     })
-
-    console.log('\n👥 Usuários cadastrados:')
-    usersWithDetails.forEach(user => {
-      console.log(`  - ${user.email} (${user.role}) - ${user.active ? 'Ativo' : 'Inativo'}`)
+    
+    console.log('👤 USUÁRIOS:')
+    users.forEach(user => {
+      console.log(`  - ${user.email} (${user.role}) - ${user.name}`)
     })
-
+    console.log(`  Total: ${users.length}\n`)
+    
     // Verificar sindicatos
-    const sindicatosWithDetails = await prisma.sindicato.findMany({
+    const sindicatos = await prisma.sindicato.findMany({
       select: {
         id: true,
         name: true,
-        active: true,
+        cnpj: true,
+        state: true,
+        admin: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
       }
     })
-
-    console.log('\n🏢 Sindicatos cadastrados:')
-    sindicatosWithDetails.forEach(sindicato => {
-      console.log(`  - ${sindicato.name} - ${sindicato.active ? 'Ativo' : 'Inativo'}`)
+    
+    console.log('🏢 SINDICATOS:')
+    sindicatos.forEach(sindicato => {
+      console.log(`  - ${sindicato.name} (${sindicato.state}) - Admin: ${sindicato.admin?.name}`)
     })
-
-    console.log('\n✅ Verificação concluída!')
+    console.log(`  Total: ${sindicatos.length}\n`)
+    
+    // Verificar membros
+    const membros = await prisma.membro.findMany({
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        cargo: true,
+        sindicato: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+    
+    console.log('👥 MEMBROS:')
+    membros.forEach(membro => {
+      console.log(`  - ${membro.nome} (${membro.cargo}) - ${membro.sindicato.name}`)
+    })
+    console.log(`  Total: ${membros.length}\n`)
+    
+    // Verificar documentos
+    const documentos = await prisma.documento.findMany({
+      select: {
+        id: true,
+        titulo: true,
+        tipo: true,
+        sindicato: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+    
+    console.log('📄 DOCUMENTOS:')
+    documentos.forEach(doc => {
+      console.log(`  - ${doc.titulo} (${doc.tipo}) - ${doc.sindicato.name}`)
+    })
+    console.log(`  Total: ${documentos.length}\n`)
+    
+    // Verificar convites
+    const convites = await prisma.convite.findMany({
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        usado: true,
+        expiresAt: true
+      }
+    })
+    
+    console.log('📧 CONVITES:')
+    convites.forEach(convite => {
+      const status = convite.usado ? 'USADO' : 'PENDENTE'
+      console.log(`  - ${convite.email} (${convite.role}) - ${status}`)
+    })
+    console.log(`  Total: ${convites.length}\n`)
+    
+    console.log('✅ Verificação concluída com sucesso!')
     
   } catch (error) {
-    console.error('❌ Erro ao verificar dados:', error)
+    console.error('❌ Erro durante verificação:', error)
   } finally {
     await prisma.$disconnect()
   }
 }
 
-checkData()
+// Executar apenas se chamado diretamente
+if (require.main === module) {
+  checkData()
+}
+
+export { checkData }

@@ -21,15 +21,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
-  // Dados específicos do membro (se necessário)
-  cpf           String?   @unique
-  cargo         String?
-  
-  // Relacionamento com sindicato (para membro - relacionamento N:1)
-  sindicatoId   String?
-  sindicato     Sindicato? @relation("SindicatoMembros", fields: [sindicatoId], references: [id])
-  
   // Relacionamentos
+  membro        Membro?
+  sindicato     Sindicato? @relation("SindicatoAdmin")
   convites      Convite[] @relation("CriadoPor")
   
   @@map("users")
@@ -55,7 +49,9 @@ model Sindicato {
   updatedAt   DateTime @updatedAt
   
   // Relacionamentos
-  membros     User[]     @relation("SindicatoMembros")
+  adminId     String   @unique
+  admin       User     @relation("SindicatoAdmin", fields: [adminId], references: [id])
+  membros     Membro[]
   documentos  Documento[]
   convites    Convite[]
   
@@ -63,21 +59,44 @@ model Sindicato {
 }
 
 
+model Membro {
+  id          String   @id @default(uuid())
+  nome        String
+  cpf         String   @unique
+  email       String
+  telefone    String?
+  cargo       String?
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relacionamentos
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  sindicatoId String
+  sindicato   Sindicato @relation(fields: [sindicatoId], references: [id])
+  documentos  Documento[]
+  
+  @@map("membros")
+}
+
 model Documento {
   id          String        @id @default(uuid())
-  name        String
+  titulo      String
   tipo        DocumentoTipo
-  description String?
-  fileUrl     String
-  fileSize    Int?
+  arquivo     String        // URL do Supabase Storage
+  tamanho     Int?
   mimeType    String?
-  sindicatoId String
-  active      Boolean       @default(true)
+  versao      String        @default("1.0")
+  ativo       Boolean       @default(true)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   
   // Relacionamentos
+  sindicatoId String
   sindicato   Sindicato @relation(fields: [sindicatoId], references: [id])
+  membroId    String?
+  membro      Membro?   @relation(fields: [membroId], references: [id])
   
   @@map("documentos")
 }
@@ -85,18 +104,18 @@ model Documento {
 model Convite {
   id          String    @id @default(uuid())
   email       String
-  role        UserRole
-  sindicatoId String?
-  invitedBy   String
+  token       String    @unique
+  role        UserRole  @default(SINDICATO_ADMIN)
   expiresAt   DateTime
-  acceptedAt  DateTime?
-  active      Boolean   @default(true)
+  usado       Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
   // Relacionamentos
+  sindicatoId String?
   sindicato   Sindicato? @relation(fields: [sindicatoId], references: [id])
-  criadoPor   User       @relation("CriadoPor", fields: [invitedBy], references: [id])
+  criadoPorId String
+  criadoPor   User       @relation("CriadoPor", fields: [criadoPorId], references: [id])
   
   @@map("convites")
 }
@@ -115,8 +134,8 @@ enum SindicatoStatus {
 }
 
 enum DocumentoTipo {
-  CCT
-  ACT
-  AVATAR
-  OUTRO
+  CCT      // Convenção Coletiva de Trabalho
+  ACT      // Acordo Coletivo de Trabalho
+  AVATAR   // Foto de perfil
+  OUTRO    // Outros documentos
 }

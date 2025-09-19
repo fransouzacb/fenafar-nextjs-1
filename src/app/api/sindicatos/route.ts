@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
     const newSindicato = await prisma.sindicato.create({
       data: {
         ...data,
+        adminId: user.id, // O usuário logado será o admin do sindicato
         status: 'PENDING', // Novo sindicato sempre começa como PENDING
       },
     })

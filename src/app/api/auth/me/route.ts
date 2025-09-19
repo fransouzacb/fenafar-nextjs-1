@@ -25,16 +25,31 @@ export async function GET(request: NextRequest) {
         role: true,
         emailConfirmed: true,
         active: true,
-        cpf: true,
-        cargo: true,
-        sindicatoId: true,
         createdAt: true,
         updatedAt: true,
         sindicato: {
           select: {
             id: true,
             name: true,
-            cnpj: true
+            cnpj: true,
+            state: true
+          }
+        },
+        membro: {
+          select: {
+            id: true,
+            nome: true,
+            cpf: true,
+            cargo: true,
+            ativo: true,
+            sindicato: {
+              select: {
+                id: true,
+                name: true,
+                cnpj: true,
+                state: true
+              }
+            }
           }
         }
       }

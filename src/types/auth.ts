@@ -8,20 +8,30 @@ export interface User {
   role: UserRole
   emailConfirmed: boolean
   active: boolean
-  cpf: string | null
-  cargo: string | null
-  sindicatoId: string | null
   createdAt: Date
   updatedAt: Date
-}
-
-export interface AuthUser extends User {
   sindicato?: {
     id: string
     name: string
     cnpj: string
+    state: string
+  } | null
+  membro?: {
+    id: string
+    nome: string
+    cpf: string
+    cargo: string | null
+    ativo: boolean
+    sindicato: {
+      id: string
+      name: string
+      cnpj: string
+      state: string
+    }
   } | null
 }
+
+export interface AuthUser extends User {}
 
 export interface LoginRequest {
   email: string
@@ -39,8 +49,6 @@ export interface RegisterRequest {
   password: string
   name: string
   phone?: string
-  cpf?: string
-  cargo?: string
 }
 
 export interface AuthState {

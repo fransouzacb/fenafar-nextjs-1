@@ -6,8 +6,6 @@ import { z } from 'zod'
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').optional(),
   phone: z.string().optional(),
-  cargo: z.string().optional(),
-  cpf: z.string().optional(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -27,7 +25,16 @@ export async function PUT(request: NextRequest) {
         ...validatedData,
         updatedAt: new Date(),
       },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailConfirmed: true,
+        active: true,
+        createdAt: true,
+        updatedAt: true,
         sindicato: {
           select: {
             id: true,
@@ -35,26 +42,21 @@ export async function PUT(request: NextRequest) {
             cnpj: true,
           },
         },
+        membro: {
+          select: {
+            id: true,
+            nome: true,
+            cpf: true,
+            cargo: true,
+            ativo: true,
+          },
+        },
       },
     })
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: updatedUser.id,
-        email: updatedUser.email,
-        name: updatedUser.name,
-        phone: updatedUser.phone,
-        role: updatedUser.role,
-        emailConfirmed: updatedUser.emailConfirmed,
-        active: updatedUser.active,
-        cpf: updatedUser.cpf,
-        cargo: updatedUser.cargo,
-        sindicatoId: updatedUser.sindicatoId,
-        sindicato: updatedUser.sindicato,
-        createdAt: updatedUser.createdAt,
-        updatedAt: updatedUser.updatedAt,
-      },
+      user: updatedUser,
     })
   } catch (error) {
     console.error('Erro ao atualizar perfil:', error)

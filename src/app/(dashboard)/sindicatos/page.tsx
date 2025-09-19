@@ -77,8 +77,11 @@ export default function SindicatosPage() {
   const loadSindicatos = async () => {
     try {
       console.log('Carregando sindicatos...')
+      const token = localStorage.getItem('access_token')
       const response = await fetch('/api/sindicatos', {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (!response.ok) {
@@ -126,7 +129,9 @@ export default function SindicatosPage() {
         case 'delete':
           response = await fetch(`/api/sindicatos/${sindicato.id}`, {
             method: 'DELETE',
-            credentials: 'include'
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
           })
           successMessage = 'Sindicato excluído com sucesso!'
           break
@@ -134,7 +139,9 @@ export default function SindicatosPage() {
         case 'approve':
           response = await fetch(`/api/sindicatos/${sindicato.id}/approve`, {
             method: 'POST',
-            credentials: 'include'
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
           })
           successMessage = 'Sindicato aprovado com sucesso!'
           break
@@ -142,7 +149,9 @@ export default function SindicatosPage() {
         case 'reject':
           response = await fetch(`/api/sindicatos/${sindicato.id}/reject`, {
             method: 'POST',
-            credentials: 'include'
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
           })
           successMessage = 'Sindicato rejeitado com sucesso!'
           break
