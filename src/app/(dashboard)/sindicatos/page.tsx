@@ -434,95 +434,101 @@ export default function SindicatosPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="pt-3 border-t border-gray-200">
-                  {/* Botões organizados em grupos lógicos */}
-                  <div className="space-y-2">
-                    {/* Primeira linha - Ações principais */}
-                    <div className="flex gap-2">
-                      <Tooltip content="Visualizar detalhes do sindicato" side="top">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setViewingSindicato(sindicato)}
-                          className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 justify-center"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Tooltip>
+                <div className="pt-4 border-t border-gray-200">
+                  {/* Grid de botões centralizados */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Visualizar */}
+                    <Tooltip content="Visualizar detalhes" side="top">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setViewingSindicato(sindicato)}
+                        className="w-full h-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex items-center justify-center p-0"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Tooltip>
 
-                      <Tooltip content="Editar informações do sindicato" side="top">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingSindicato(sindicato)}
-                          className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 justify-center"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Tooltip>
-                    </div>
+                    {/* Editar */}
+                    <Tooltip content="Editar informações" side="top">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingSindicato(sindicato)}
+                        className="w-full h-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex items-center justify-center p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Tooltip>
 
-                    {/* Segunda linha - Controle de acesso */}
-                    <div className="flex gap-2">
-                      <Tooltip content={sindicato.active ? "Bloquear acesso do sindicato" : "Desbloquear acesso do sindicato"} side="top">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
-                          className={`flex-1 justify-center ${sindicato.active 
-                            ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
-                            : 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                          }`}
-                        >
-                          {sindicato.active ? (
-                            <Lock className="h-4 w-4" />
-                          ) : (
-                            <Unlock className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </Tooltip>
+                    {/* Bloquear/Desbloquear */}
+                    <Tooltip content={sindicato.active ? "Bloquear acesso" : "Desbloquear acesso"} side="top">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
+                        className={`w-full h-10 flex items-center justify-center p-0 ${sindicato.active 
+                          ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
+                          : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                        }`}
+                      >
+                        {sindicato.active ? (
+                          <Lock className="h-4 w-4" />
+                        ) : (
+                          <Unlock className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </Tooltip>
 
-                      {/* Aprovar/Rejeitar/Excluir baseado no status */}
-                      {sindicato.status === 'PENDING' ? (
-                        <>
-                          {/* Aprovar */}
-                          <Tooltip content="Aprovar sindicato" side="top">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openConfirmationDialog('approve', sindicato)}
-                              className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50 justify-center"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                          
-                          {/* Rejeitar */}
-                          <Tooltip content="Rejeitar sindicato" side="top">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openConfirmationDialog('reject', sindicato)}
-                              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 justify-center"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                        </>
-                      ) : (
-                        /* Excluir */
-                        <Tooltip content="Excluir sindicato permanentemente" side="top">
+                    {/* Aprovar/Rejeitar/Excluir baseado no status */}
+                    {sindicato.status === 'PENDING' ? (
+                      <>
+                        {/* Aprovar */}
+                        <Tooltip content="Aprovar sindicato" side="top">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openConfirmationDialog('approve', sindicato)}
+                            className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-0"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
+                        
+                        {/* Rejeitar */}
+                        <Tooltip content="Rejeitar sindicato" side="top">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openConfirmationDialog('reject', sindicato)}
+                            className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-0"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
+
+                        {/* Espaço vazio para manter grid */}
+                        <div></div>
+                      </>
+                    ) : (
+                      /* Excluir */
+                      <>
+                        <Tooltip content="Excluir permanentemente" side="top">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => openConfirmationDialog('delete', sindicato)}
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 justify-center"
+                            className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-0"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </Tooltip>
-                      )}
-                    </div>
+                        
+                        {/* Espaços vazios para manter grid */}
+                        <div></div>
+                        <div></div>
+                      </>
+                    )}
                   </div>
                 </div>
 
