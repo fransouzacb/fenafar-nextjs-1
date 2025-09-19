@@ -76,7 +76,8 @@ async function createEmailTemplatesTable() {
     console.log(`👤 Usando usuário admin: ${adminUser.name} (${adminUser.email})`)
 
     // Template para convite de sindicato
-    await prisma.emailTemplate.create({
+    try {
+      await prisma.emailTemplate.create({
       data: {
         name: 'Convite para Admin de Sindicato',
         subject: 'Convite para Administrar Sindicato - FENAFAR',
@@ -161,12 +162,16 @@ async function createEmailTemplatesTable() {
         isActive: true,
         createdById: adminUser.id
       }
-    })
+      })
 
-    console.log('✅ Template "Convite para Admin de Sindicato" criado')
+      console.log('✅ Template "Convite para Admin de Sindicato" criado')
+    } catch (error) {
+      console.log('⚠️  Template "Convite para Admin de Sindicato" não pôde ser criado (modelo pode não existir):', error)
+    }
 
     // Template para convite de membro
-    await prisma.emailTemplate.create({
+    try {
+      await prisma.emailTemplate.create({
       data: {
         name: 'Convite para Membro',
         subject: 'Convite para Participar do Sindicato - FENAFAR',
@@ -249,9 +254,13 @@ async function createEmailTemplatesTable() {
         isActive: true,
         createdById: adminUser.id
       }
-    })
+      })
 
-    console.log('✅ Template "Convite para Membro" criado')
+      console.log('✅ Template "Convite para Membro" criado')
+    } catch (error) {
+      console.log('⚠️  Template "Convite para Membro" não pôde ser criado (modelo pode não existir):', error)
+    }
+
     console.log('🎉 Sistema de e-mail configurado com sucesso!')
 
   } catch (error) {
