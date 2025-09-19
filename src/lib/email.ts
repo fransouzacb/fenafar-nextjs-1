@@ -69,12 +69,9 @@ export const DEFAULT_TEMPLATES: Omit<EmailTemplate, 'id' | 'createdAt' | 'update
             <p>Você foi convidado por <strong>{{criadoPor}}</strong> para administrar um sindicato na plataforma FENAFAR.</p>
             
             <div class="highlight">
-              <h3>Detalhes do Sindicato:</h3>
-              <p><strong>Nome:</strong> {{nomeSindicato}}</p>
-              <p><strong>CNPJ:</strong> {{cnpjSindicato}}</p>
-              {{#if maxMembers}}
+              <h3>Configuração do Sindicato:</h3>
               <p><strong>Limite de Membros:</strong> {{maxMembers}}</p>
-              {{/if}}
+              <p>Você poderá configurar o nome, CNPJ e outras informações do sindicato após aceitar o convite.</p>
             </div>
             
             <p>Para aceitar este convite e começar a administrar o sindicato, clique no botão abaixo:</p>
@@ -105,12 +102,10 @@ export const DEFAULT_TEMPLATES: Omit<EmailTemplate, 'id' | 'createdAt' | 'update
       
       Você foi convidado por {{criadoPor}} para administrar um sindicato na plataforma FENAFAR.
       
-      Detalhes do Sindicato:
-      - Nome: {{nomeSindicato}}
-      - CNPJ: {{cnpjSindicato}}
-      {{#if maxMembers}}
+      Configuração do Sindicato:
       - Limite de Membros: {{maxMembers}}
-      {{/if}}
+      
+      Você poderá configurar o nome, CNPJ e outras informações do sindicato após aceitar o convite.
       
       Para aceitar este convite: {{linkConvite}}
       
