@@ -21,6 +21,8 @@ interface SindicatoStats {
   convitesPendentes: number
   ultimaAtividade: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  sindicatoName?: string
+  sindicatoId?: string
 }
 
 export default function SindicatoDashboard() {
@@ -51,7 +53,9 @@ export default function SindicatoDashboard() {
         totalDocumentos: data.totalDocumentos,
         convitesPendentes: data.convitesPendentes,
         ultimaAtividade: data.ultimaAtividade,
-        status: data.status
+        status: data.status,
+        sindicatoName: data.sindicatoName,
+        sindicatoId: data.sindicatoId
       })
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error)
@@ -116,6 +120,11 @@ export default function SindicatoDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Dashboard do Sindicato
+          {stats?.sindicatoName && (
+            <span className="text-xl text-blue-600 ml-2">
+              - {stats.sindicatoName}
+            </span>
+          )}
         </h1>
         <p className="text-gray-600">
           Gerencie seus membros, documentos e convites

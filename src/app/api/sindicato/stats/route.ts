@@ -57,12 +57,14 @@ export async function GET(request: NextRequest) {
       sindicato
     ] = await Promise.all([
       // Total de membros (apenas para SINDICATO_ADMIN)
+      // Como o schema atual não tem relação direta MEMBER-Sindicato,
+      // vamos contar os convites MEMBER pendentes para este sindicato
       user.role === UserRole.SINDICATO_ADMIN 
-        ? prisma.user.count({
+        ? prisma.convite.count({
             where: { 
               role: UserRole.MEMBER,
-              // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
-              // sindicatoId: sindicatoId
+              sindicatoId: sindicatoId,
+              usado: true // Membros que aceitaram o convite
             }
           })
         : Promise.resolve(0),
@@ -121,7 +123,8 @@ export async function GET(request: NextRequest) {
       convitesPendentes,
       ultimaAtividade,
       status: sindicato?.status || 'PENDING',
-      sindicatoName: sindicato?.name
+      sindicatoName: sindicato?.name,
+      sindicatoId: sindicatoId
     })
 
   } catch (error: any) {

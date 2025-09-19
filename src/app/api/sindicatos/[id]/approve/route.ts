@@ -50,9 +50,11 @@ export async function POST(
         approvedBy: user.id
       },
       include: {
-        _count: {
+        admin: {
           select: {
-            membros: true
+            id: true,
+            name: true,
+            email: true
           }
         }
       }
