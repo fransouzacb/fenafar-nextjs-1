@@ -90,18 +90,10 @@ async function checkData() {
     console.log(`  Total: ${documentos.length}\n`)
     
     // Verificar convites
-    const convites = await prisma.convite.findMany({
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        usado: true,
-        expiresAt: true
-      }
-    })
+    const convites = await prisma.convite.findMany()
     
     console.log('📧 CONVITES:')
-    convites.forEach(convite => {
+    convites.forEach((convite: any) => {
       const status = convite.usado ? 'USADO' : 'PENDENTE'
       console.log(`  - ${convite.email} (${convite.role}) - ${status}`)
     })
