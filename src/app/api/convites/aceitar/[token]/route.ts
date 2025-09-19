@@ -162,12 +162,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Não é necessário atualizar o usuário
       }
 
-      // Se for MEMBER, associar ao sindicato existente
+      // Para MEMBERs, o relacionamento com sindicato será implementado futuramente
+      // O schema atual não suporta associação direta entre MEMBERs e Sindicatos
       if (convite.role === UserRole.MEMBER && convite.sindicatoId) {
-        await tx.user.update({
-          where: { id: newUser.id },
-          data: { sindicatoId: convite.sindicatoId }
-        })
+        console.log(`📝 MEMBER ${newUser.email} convidado para sindicato ${convite.sindicatoId}`)
+        // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
       }
 
       // Marcar convite como usado
