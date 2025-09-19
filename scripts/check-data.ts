@@ -74,10 +74,7 @@ async function checkData() {
     
     // Verificar documentos
     const documentos = await prisma.documento.findMany({
-      select: {
-        id: true,
-        titulo: true,
-        tipo: true,
+      include: {
         sindicato: {
           select: {
             name: true
