@@ -158,11 +158,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           }
         })
 
-        // Atualizar usuário com sindicatoId
-        await tx.user.update({
-          where: { id: newUser.id },
-          data: { sindicatoId: newSindicato.id }
-        })
+        // Relacionamento já estabelecido via adminId no sindicato
+        // Não é necessário atualizar o usuário
       }
 
       // Se for MEMBER, associar ao sindicato existente
