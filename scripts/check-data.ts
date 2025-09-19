@@ -84,8 +84,8 @@ async function checkData() {
     })
     
     console.log('📄 DOCUMENTOS:')
-    documentos.forEach(doc => {
-      console.log(`  - ${doc.titulo} (${doc.tipo}) - ${doc.sindicato.name}`)
+    documentos.forEach((doc: any) => {
+      console.log(`  - ${doc.titulo || doc.name || 'Sem título'} (${doc.tipo}) - ${doc.sindicato.name}`)
     })
     console.log(`  Total: ${documentos.length}\n`)
     
