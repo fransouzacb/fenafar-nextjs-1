@@ -20,7 +20,11 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  Lock,
+  Unlock,
+  User
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
@@ -61,13 +65,14 @@ export default function SindicatosPage() {
   const [editingSindicato, setEditingSindicato] = useState<Sindicato | null>(null)
   const [confirmationDialog, setConfirmationDialog] = useState<{
     open: boolean
-    type: 'delete' | 'approve' | 'reject' | null
+    type: 'delete' | 'approve' | 'reject' | 'block' | 'unblock' | null
     sindicato: Sindicato | null
   }>({
     open: false,
     type: null,
     sindicato: null
   })
+  const [viewingSindicato, setViewingSindicato] = useState<Sindicato | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
@@ -101,7 +106,7 @@ export default function SindicatosPage() {
     }
   }
 
-  const openConfirmationDialog = (type: 'delete' | 'approve' | 'reject', sindicato: Sindicato) => {
+  const openConfirmationDialog = (type: 'delete' | 'approve' | 'reject' | 'block' | 'unblock', sindicato: Sindicato) => {
     setConfirmationDialog({
       open: true,
       type,
@@ -156,6 +161,30 @@ export default function SindicatosPage() {
             }
           })
           successMessage = 'Sindicato rejeitado com sucesso!'
+          break
+
+        case 'block':
+          response = await fetch(`/api/sindicatos/${sindicato.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify({ active: false })
+          })
+          successMessage = 'Sindicato bloqueado com sucesso!'
+          break
+
+        case 'unblock':
+          response = await fetch(`/api/sindicatos/${sindicato.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify({ active: true })
+          })
+          successMessage = 'Sindicato desbloqueado com sucesso!'
           break
 
         default:
@@ -325,32 +354,32 @@ export default function SindicatosPage() {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {filteredSindicatos.map((sindicato) => (
-            <Card key={sindicato.id} className="fenafar-card">
-              <CardHeader>
+            <Card key={sindicato.id} className="fenafar-card hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Building2 className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{sindicato.name}</CardTitle>
-                      <CardDescription className="text-sm text-gray-500">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg truncate">{sindicato.name}</CardTitle>
+                      <CardDescription className="text-sm text-gray-500 truncate">
                         CNPJ: {sindicato.cnpj}
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <Badge variant={sindicato.active ? "default" : "secondary"}>
-                      {sindicato.active ? 'Ativo' : 'Inativo'}
+                  <div className="flex flex-col items-end space-y-1 flex-shrink-0">
+                    <Badge variant={sindicato.active ? "default" : "secondary"} className="text-xs">
+                      {sindicato.active ? 'Ativo' : 'Bloqueado'}
                     </Badge>
                     {(() => {
                       const statusInfo = getStatusInfo(sindicato.status)
                       return (
                         <Badge 
                           variant="outline" 
-                          className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
+                          className={`${statusInfo.bgColor} ${statusInfo.color} border-0 text-xs`}
                         >
                           <statusInfo.icon className="h-3 w-3 mr-1" />
                           {statusInfo.text}
@@ -360,34 +389,34 @@ export default function SindicatosPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div className="space-y-2">
                   {sindicato.email && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Mail className="h-4 w-4 mr-2" />
-                      {sindicato.email}
+                      <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{sindicato.email}</span>
                     </div>
                   )}
                   {sindicato.phone && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="h-4 w-4 mr-2" />
-                      {sindicato.phone}
+                      <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{sindicato.phone}</span>
                     </div>
                   )}
                   {sindicato.city && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {sindicato.city}, {sindicato.state}
+                      <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{sindicato.city}, {sindicato.state}</span>
                     </div>
                   )}
                   {sindicato.website && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="h-4 w-4 mr-2 flex-shrink-0" />
                       <a 
                         href={sindicato.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline truncate"
                       >
                         {sindicato.website}
                       </a>
@@ -395,46 +424,95 @@ export default function SindicatosPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Users className="h-4 w-4 mr-1" />
-                    Admin: {sindicato.admin?.name || 'N/A'}
+                {/* Admin Info */}
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <User className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Admin: {sindicato.admin?.name || 'N/A'}</span>
                   </div>
-                  <div className="flex space-x-2">
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-3 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-2">
+                    {/* Visualizar */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setViewingSindicato(sindicato)}
+                      className="flex-1 min-w-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Ver</span>
+                    </Button>
+
+                    {/* Bloquear/Desbloquear */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openConfirmationDialog(sindicato.active ? 'block' : 'unblock', sindicato)}
+                      className={`flex-1 min-w-0 ${sindicato.active 
+                        ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' 
+                        : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                      }`}
+                    >
+                      {sindicato.active ? (
+                        <>
+                          <Lock className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Bloquear</span>
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Desbloquear</span>
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Aprovar/Rejeitar (apenas para PENDING) */}
                     {sindicato.status === 'PENDING' && (
                       <>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => openConfirmationDialog('approve', sindicato)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          className="flex-1 min-w-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                         >
-                          <CheckCircle className="h-4 w-4" />
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Aprovar</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => openConfirmationDialog('reject', sindicato)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="flex-1 min-w-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          <XCircle className="h-4 w-4" />
+                          <XCircle className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Rejeitar</span>
                         </Button>
                       </>
                     )}
+
+                    {/* Editar */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingSindicato(sindicato)}
+                      className="flex-1 min-w-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Editar</span>
                     </Button>
+
+                    {/* Excluir */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openConfirmationDialog('delete', sindicato)}
-                      className="text-red-600 hover:text-red-700"
+                      className="flex-1 min-w-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Excluir</span>
                     </Button>
                   </div>
                 </div>
@@ -498,24 +576,216 @@ export default function SindicatosPage() {
             ? 'Excluir Sindicato' 
             : confirmationDialog.type === 'approve'
             ? 'Aprovar Sindicato'
-            : 'Rejeitar Sindicato'
+            : confirmationDialog.type === 'reject'
+            ? 'Rejeitar Sindicato'
+            : confirmationDialog.type === 'block'
+            ? 'Bloquear Sindicato'
+            : 'Desbloquear Sindicato'
         }
         description={
           confirmationDialog.type === 'delete'
             ? `Tem certeza que deseja excluir o sindicato "${confirmationDialog.sindicato?.name}"? Esta ação não pode ser desfeita.`
             : confirmationDialog.type === 'approve'
             ? `Tem certeza que deseja aprovar o sindicato "${confirmationDialog.sindicato?.name}"?`
-            : `Tem certeza que deseja rejeitar o sindicato "${confirmationDialog.sindicato?.name}"?`
+            : confirmationDialog.type === 'reject'
+            ? `Tem certeza que deseja rejeitar o sindicato "${confirmationDialog.sindicato?.name}"?`
+            : confirmationDialog.type === 'block'
+            ? `Tem certeza que deseja bloquear o sindicato "${confirmationDialog.sindicato?.name}"? O sindicato não poderá acessar o sistema.`
+            : `Tem certeza que deseja desbloquear o sindicato "${confirmationDialog.sindicato?.name}"? O sindicato poderá acessar o sistema novamente.`
         }
         variant={
           confirmationDialog.type === 'delete' 
             ? 'danger' 
             : confirmationDialog.type === 'approve'
             ? 'success'
-            : 'danger'
+            : confirmationDialog.type === 'reject'
+            ? 'danger'
+            : confirmationDialog.type === 'block'
+            ? 'warning'
+            : 'success'
         }
         isLoading={isProcessing}
       />
+
+      {/* Modal de Visualização */}
+      {viewingSindicato && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detalhes do Sindicato</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewingSindicato(null)}
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Informações Básicas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Nome</label>
+                        <p className="text-gray-900">{viewingSindicato.name}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">CNPJ</label>
+                        <p className="text-gray-900">{viewingSindicato.cnpj}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Email</label>
+                        <p className="text-gray-900">{viewingSindicato.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Telefone</label>
+                        <p className="text-gray-900">{viewingSindicato.phone || 'Não informado'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Localização</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Endereço</label>
+                        <p className="text-gray-900">{viewingSindicato.address || 'Não informado'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Cidade/Estado</label>
+                        <p className="text-gray-900">
+                          {viewingSindicato.city && viewingSindicato.state 
+                            ? `${viewingSindicato.city}, ${viewingSindicato.state}`
+                            : 'Não informado'
+                          }
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">CEP</label>
+                        <p className="text-gray-900">{viewingSindicato.zipCode || 'Não informado'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Website</label>
+                        <p className="text-gray-900">
+                          {viewingSindicato.website ? (
+                            <a 
+                              href={viewingSindicato.website} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {viewingSindicato.website}
+                            </a>
+                          ) : (
+                            'Não informado'
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Administrador */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Administrador</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{viewingSindicato.admin?.name || 'N/A'}</p>
+                        <p className="text-sm text-gray-500">{viewingSindicato.admin?.email || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
+                  <div className="flex space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={viewingSindicato.active ? "default" : "secondary"}>
+                        {viewingSindicato.active ? 'Ativo' : 'Bloqueado'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {(() => {
+                        const statusInfo = getStatusInfo(viewingSindicato.status)
+                        return (
+                          <Badge 
+                            variant="outline" 
+                            className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
+                          >
+                            <statusInfo.icon className="h-3 w-3 mr-1" />
+                            {statusInfo.text}
+                          </Badge>
+                        )
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Descrição */}
+                {viewingSindicato.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Descrição</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-700">{viewingSindicato.description}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Informações de Data */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações de Data</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Criado em</label>
+                      <p className="text-gray-900">{formatDate(viewingSindicato.createdAt)}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Atualizado em</label>
+                      <p className="text-gray-900">{formatDate(viewingSindicato.updatedAt)}</p>
+                    </div>
+                    {viewingSindicato.approvedAt && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Aprovado em</label>
+                        <p className="text-gray-900">{formatDate(viewingSindicato.approvedAt)}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setViewingSindicato(null)}
+                >
+                  Fechar
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingSindicato(viewingSindicato)
+                    setViewingSindicato(null)
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
