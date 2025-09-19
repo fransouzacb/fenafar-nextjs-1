@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
@@ -115,11 +116,44 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Hash da senha (não usado no schema atual, mas mantido para futuras implementações)
     // const hashedPassword = await bcrypt.hash(userData.password, 12)
 
-    // Iniciar transação
+    // Verificar se Supabase Admin está configurado
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Serviço de autenticação não configurado' },
+        { status: 500 }
+      )
+    }
+
+    // Criar usuário no Supabase Auth primeiro
+    console.log('🔐 Criando usuário no Supabase Auth...')
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: userData.email,
+      password: userData.password,
+      email_confirm: true, // Confirmar email automaticamente
+      user_metadata: {
+        name: userData.name,
+        role: convite.role,
+        cpf: userData.cpf,
+        cargo: userData.cargo
+      }
+    })
+
+    if (authError || !authUser.user) {
+      console.error('❌ Erro ao criar usuário no Supabase Auth:', authError)
+      return NextResponse.json(
+        { error: 'Erro ao criar conta de usuário: ' + (authError?.message || 'Erro desconhecido') },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Usuário criado no Supabase Auth:', authUser.user.id)
+
+    // Iniciar transação para criar no banco local
     const result = await prisma.$transaction(async (tx) => {
-      // Criar usuário com campos completos
+      // Criar usuário no banco local com ID do Supabase
       const newUser = await tx.user.create({
         data: {
+          id: authUser.user.id, // Usar ID do Supabase Auth
           name: userData.name,
           email: userData.email,
           role: convite.role,
@@ -180,12 +214,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({
       success: true,
-      message: 'Convite aceito com sucesso!',
+      message: 'Convite aceito com sucesso! Usuário criado e pode fazer login.',
       user: {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
         role: result.user.role
+      },
+      authUser: {
+        id: authUser.user.id,
+        email: authUser.user.email,
+        emailConfirmed: authUser.user.email_confirmed_at ? true : false
       },
       sindicato: result.sindicato ? {
         id: result.sindicato.id,
