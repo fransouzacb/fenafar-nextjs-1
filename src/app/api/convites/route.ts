@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(convites)
+    return NextResponse.json({ convites })
 
   } catch (error) {
     console.error('Erro ao buscar convites:', error)

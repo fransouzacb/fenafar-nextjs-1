@@ -81,16 +81,10 @@ export default function ConvitesPage() {
   const loadConvites = async () => {
     try {
       setIsLoading(true)
-      const token = localStorage.getItem('access_token')
-      
-      if (!token) {
-        toast.error('Token de autorização necessário')
-        return
-      }
 
       const response = await fetch('/api/convites', {
+        credentials: 'include', // Usar cookies para autenticação
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -112,15 +106,9 @@ export default function ConvitesPage() {
   // Carregar sindicatos
   const loadSindicatos = async () => {
     try {
-      const token = localStorage.getItem('access_token')
-      
-      if (!token) {
-        return
-      }
-
       const response = await fetch('/api/sindicatos', {
+        credentials: 'include', // Usar cookies para autenticação
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -212,12 +200,6 @@ export default function ConvitesPage() {
     if (!confirmationDialog.convite) return
 
     const { type, convite } = confirmationDialog
-    const token = localStorage.getItem('access_token')
-
-    if (!token) {
-      toast.error('Token de autorização necessário')
-      return
-    }
 
     try {
       let response: Response
@@ -227,8 +209,8 @@ export default function ConvitesPage() {
         case 'delete':
           response = await fetch(`/api/convites/${convite.id}`, {
             method: 'DELETE',
+            credentials: 'include', // Usar cookies para autenticação
             headers: {
-              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           })
@@ -246,8 +228,8 @@ export default function ConvitesPage() {
           
           response = await fetch('/api/convites', {
             method: 'POST',
+            credentials: 'include', // Usar cookies para autenticação
             headers: {
-              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(resendData)
