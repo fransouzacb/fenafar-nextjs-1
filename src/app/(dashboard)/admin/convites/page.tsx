@@ -407,7 +407,10 @@ export default function ConvitesPage() {
                         variant="outline" 
                         className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
                       >
-                        <statusInfo.icon className="h-3 w-3 mr-1" />
+{(() => {
+                          const StatusIcon = statusInfo.icon
+                          return <StatusIcon className="h-3 w-3 mr-1" />
+                        })()}
                         {statusInfo.text}
                       </Badge>
                     </div>
@@ -620,7 +623,10 @@ export default function ConvitesPage() {
                         variant="outline" 
                         className={`${getStatusInfo(viewingConvite).bgColor} ${getStatusInfo(viewingConvite).color} border-0`}
                       >
-                        <getStatusInfo(viewingConvite).icon className="h-3 w-3 mr-1" />
+{(() => {
+                          const StatusIcon = getStatusInfo(viewingConvite).icon
+                          return <StatusIcon className="h-3 w-3 mr-1" />
+                        })()}
                         {getStatusInfo(viewingConvite).text}
                       </Badge>
                     </div>
