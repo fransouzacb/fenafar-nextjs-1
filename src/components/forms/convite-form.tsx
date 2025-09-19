@@ -82,10 +82,12 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
       newErrors.role = 'Role é obrigatório'
     }
 
-    if (formData.role === 'SINDICATO_ADMIN' && !formData.sindicatoId) {
-      newErrors.sindicatoId = 'Sindicato é obrigatório para admin de sindicato'
+    // Para MEMBER: deve selecionar um sindicato existente
+    if (formData.role === 'MEMBER' && !formData.sindicatoId) {
+      newErrors.sindicatoId = 'Sindicato é obrigatório para convite de membro'
     }
 
+    // Para SINDICATO_ADMIN: deve definir limite de membros (para o novo sindicato)
     if (formData.role === 'SINDICATO_ADMIN' && (!formData.maxMembers || formData.maxMembers <= 0)) {
       newErrors.maxMembers = 'Limite de membros é obrigatório para admin de sindicato'
     }
@@ -121,7 +123,9 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
 
       const payload = {
         ...formData,
-        sindicatoId: formData.role === 'SINDICATO_ADMIN' ? formData.sindicatoId || null : null,
+        // Para SINDICATO_ADMIN: não envia sindicatoId (será criado novo sindicato)
+        // Para MEMBER: envia sindicatoId (membro será adicionado ao sindicato existente)
+        sindicatoId: formData.role === 'MEMBER' ? formData.sindicatoId || null : null,
         maxMembers: formData.role === 'SINDICATO_ADMIN' ? formData.maxMembers || null : null
       }
 
@@ -198,23 +202,29 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
 
             {/* Role */}
             <div className="space-y-2">
-              <Label htmlFor="role">Função *</Label>
+              <Label htmlFor="role">Tipo de Convite *</Label>
               <select
                 id="role"
                 value={formData.role}
                 onChange={(e) => handleChange('role', e.target.value as 'SINDICATO_ADMIN' | 'MEMBER')}
                 className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="MEMBER">Membro</option>
-                <option value="SINDICATO_ADMIN">Admin de Sindicato</option>
+                <option value="SINDICATO_ADMIN">Admin de Sindicato (Criar Novo Sindicato)</option>
+                <option value="MEMBER">Membro (Adicionar a Sindicato Existente)</option>
               </select>
+              <p className="text-xs text-gray-500">
+                {formData.role === 'SINDICATO_ADMIN' 
+                  ? 'Convite para criar e administrar um novo sindicato'
+                  : 'Convite para adicionar um membro a um sindicato existente'
+                }
+              </p>
               {errors.role && (
                 <p className="text-sm text-red-500">{errors.role}</p>
               )}
             </div>
 
-            {/* Sindicato (apenas para SINDICATO_ADMIN) */}
-            {formData.role === 'SINDICATO_ADMIN' && (
+            {/* Sindicato (apenas para MEMBER) */}
+            {formData.role === 'MEMBER' && (
               <div className="space-y-2">
                 <Label htmlFor="sindicatoId">Sindicato *</Label>
                 <select
@@ -230,6 +240,9 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500">
+                  Selecione o sindicato para o qual o membro será convidado
+                </p>
                 {errors.sindicatoId && (
                   <p className="text-sm text-red-500">{errors.sindicatoId}</p>
                 )}
@@ -250,7 +263,7 @@ export function ConviteForm({ convite, onClose, onSuccess }: ConviteFormProps) {
                   className={errors.maxMembers ? 'border-red-500' : ''}
                 />
                 <p className="text-xs text-gray-500">
-                  Número máximo de membros que este sindicato pode ter
+                  Número máximo de membros que o novo sindicato poderá ter
                 </p>
                 {errors.maxMembers && (
                   <p className="text-sm text-red-500">{errors.maxMembers}</p>

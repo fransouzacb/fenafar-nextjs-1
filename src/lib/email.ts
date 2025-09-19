@@ -256,6 +256,14 @@ export async function sendEmail(emailData: EmailData): Promise<{ success: boolea
       name: emailData.fromName || process.env.BREVO_FROM_NAME || 'FENAFAR'
     }
 
+    // Debug: Log da configuração
+    console.log('📧 Enviando e-mail com configuração:', {
+      to: sendSmtpEmail.to,
+      subject: sendSmtpEmail.subject,
+      sender: sendSmtpEmail.sender,
+      apiKey: process.env.BREVO_API_KEY ? '✅ Configurada' : '❌ Não configurada'
+    })
+
     // Enviar e-mail
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     
