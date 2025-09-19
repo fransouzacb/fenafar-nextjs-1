@@ -56,23 +56,6 @@ export async function POST(request: NextRequest) {
             cnpj: true,
             state: true
           }
-        },
-        membro: {
-          select: {
-            id: true,
-            nome: true,
-            cpf: true,
-            cargo: true,
-            ativo: true,
-            sindicato: {
-              select: {
-                id: true,
-                name: true,
-                cnpj: true,
-                state: true
-              }
-            }
-          }
         }
       }
     })
@@ -104,23 +87,6 @@ export async function POST(request: NextRequest) {
               name: true,
               cnpj: true,
               state: true
-            }
-          },
-          membro: {
-            select: {
-              id: true,
-              nome: true,
-              cpf: true,
-              cargo: true,
-              ativo: true,
-              sindicato: {
-                select: {
-                  id: true,
-                  name: true,
-                  cnpj: true,
-                  state: true
-                }
-              }
             }
           }
         }

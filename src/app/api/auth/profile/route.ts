@@ -42,15 +42,6 @@ export async function PUT(request: NextRequest) {
             cnpj: true,
           },
         },
-        membro: {
-          select: {
-            id: true,
-            nome: true,
-            cpf: true,
-            cargo: true,
-            ativo: true,
-          },
-        },
       },
     })
 

@@ -16,19 +16,6 @@ export interface User {
     cnpj: string
     state: string
   } | null
-  membro?: {
-    id: string
-    nome: string
-    cpf: string
-    cargo: string | null
-    ativo: boolean
-    sindicato: {
-      id: string
-      name: string
-      cnpj: string
-      state: string
-    }
-  } | null
 }
 
 export interface AuthUser extends User {}
