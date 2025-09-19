@@ -120,6 +120,13 @@ export async function POST(request: NextRequest) {
       const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${token}`
       const expiraEm = expiresAt.toLocaleDateString('pt-BR')
       
+      console.log('📧 Enviando e-mail do convite:', {
+        to: data.email,
+        tipo: data.role,
+        link: linkConvite,
+        sindicato: newConvite.sindicato?.name
+      })
+      
       const emailResult = await sendConviteEmail({
         to: data.email,
         nomeSindicato: newConvite.sindicato?.name,
@@ -131,12 +138,16 @@ export async function POST(request: NextRequest) {
         tipoConvite: data.role
       })
 
+      console.log('📧 Resultado do envio:', emailResult)
+
       if (!emailResult.success) {
-        console.error('Erro ao enviar e-mail do convite:', emailResult.error)
+        console.error('❌ Erro ao enviar e-mail do convite:', emailResult.error)
         // Não falhar a criação do convite se o e-mail falhar
+      } else {
+        console.log('✅ E-mail enviado com sucesso!')
       }
     } catch (emailError) {
-      console.error('Erro ao enviar e-mail do convite:', emailError)
+      console.error('❌ Erro ao enviar e-mail do convite:', emailError)
       // Não falhar a criação do convite se o e-mail falhar
     }
 

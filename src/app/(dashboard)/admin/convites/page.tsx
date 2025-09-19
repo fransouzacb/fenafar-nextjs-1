@@ -226,6 +226,8 @@ export default function ConvitesPage() {
             maxMembers: convite.maxMembers
           }
           
+          console.log('Dados do reenvio:', resendData)
+          
           response = await fetch('/api/convites', {
             method: 'POST',
             credentials: 'include', // Usar cookies para autenticação
@@ -234,6 +236,14 @@ export default function ConvitesPage() {
             },
             body: JSON.stringify(resendData)
           })
+          
+          console.log('Resposta do reenvio:', response.status, response.ok)
+          
+          if (response.ok) {
+            const responseData = await response.json()
+            console.log('Dados da resposta:', responseData)
+          }
+          
           successMessage = 'Convite reenviado com sucesso!'
           break
 
@@ -466,7 +476,7 @@ export default function ConvitesPage() {
                         </div>
                       </div>
 
-                      {/* Reenviar/Excluir baseado no status */}
+                      {/* Reenviar */}
                       {(() => {
                         const isUsado = convite.usado
                         const isExpired = new Date(convite.expiresAt) < new Date()
@@ -481,8 +491,7 @@ export default function ConvitesPage() {
                         })
                         
                         return canResend
-                      })() ? (
-                        /* Reenviar */
+                      })() && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -498,24 +507,24 @@ export default function ConvitesPage() {
                           <Send className="h-4 w-4 mr-1" />
                           <span className="text-xs">Reenviar</span>
                         </Button>
-                      ) : (
-                        /* Excluir */
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            openConfirmationDialog('delete', convite)
-                          }}
-                          disabled={convite.usado}
-                          className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Excluir convite"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          <span className="text-xs">Excluir</span>
-                        </Button>
                       )}
+
+                      {/* Excluir */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          openConfirmationDialog('delete', convite)
+                        }}
+                        disabled={convite.usado}
+                        className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Excluir convite"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        <span className="text-xs">Excluir</span>
+                      </Button>
                     </div>
                   </div>
 
