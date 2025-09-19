@@ -175,7 +175,7 @@ async function createSimpleData() {
     // 5. Criar convites pendentes
     console.log('\n📧 Criando convites...')
     const convites = await Promise.all([
-      prisma.convite.create({
+      (prisma as any).convite.create({
         data: {
           email: 'novo1@exemplo.com',
           token: 'token-exemplo-1',
@@ -185,7 +185,7 @@ async function createSimpleData() {
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         }
       }),
-      prisma.convite.create({
+      (prisma as any).convite.create({
         data: {
           email: 'novo2@exemplo.com',
           token: 'token-exemplo-2',
