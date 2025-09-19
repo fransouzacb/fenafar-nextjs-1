@@ -28,6 +28,7 @@ import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { ConviteForm } from '@/components/forms/convite-form'
+import { Tooltip } from '@/components/ui/tooltip'
 
 interface Convite {
   id: string
@@ -376,36 +377,36 @@ export default function ConvitesPage() {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {filteredConvites.map((convite) => {
             const statusInfo = getStatusInfo(convite)
             const roleInfo = getRoleInfo(convite.role)
             
             return (
-              <Card key={convite.id} className="fenafar-card">
-                <CardHeader>
+              <Card key={convite.id} className="fenafar-card hover:shadow-lg transition-shadow duration-200">
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <UserPlus className="h-5 w-5 text-blue-600" />
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{convite.email}</CardTitle>
-                        <CardDescription className="text-sm text-gray-500">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-lg truncate">{convite.email}</CardTitle>
+                        <CardDescription className="text-sm text-gray-500 truncate">
                           {convite.sindicato?.name || 'Sem sindicato'}
                         </CardDescription>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end space-y-2">
+                    <div className="flex flex-col items-end space-y-1 flex-shrink-0">
                       <Badge 
                         variant="outline" 
-                        className={`${roleInfo.bgColor} ${roleInfo.color} border-0`}
+                        className={`${roleInfo.bgColor} ${roleInfo.color} border-0 text-xs`}
                       >
                         {roleInfo.text}
                       </Badge>
                       <Badge 
                         variant="outline" 
-                        className={`${statusInfo.bgColor} ${statusInfo.color} border-0`}
+                        className={`${statusInfo.bgColor} ${statusInfo.color} border-0 text-xs`}
                       >
                         <statusInfo.icon className="h-3 w-3 mr-1" />
                         {statusInfo.text}
@@ -417,64 +418,91 @@ export default function ConvitesPage() {
                   <div className="space-y-2">
                     {convite.sindicato && (
                       <div className="flex items-center text-sm text-gray-600">
-                        <Building2 className="h-4 w-4 mr-2" />
-                        {convite.sindicato.name} ({convite.sindicato.cnpj})
+                        <Building2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{convite.sindicato.name} ({convite.sindicato.cnpj})</span>
                       </div>
                     )}
                     <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Expira em {formatDate(convite.expiresAt)}
+                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">Expira em {formatDate(convite.expiresAt)}</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
-                      <Mail className="h-4 w-4 mr-2" />
-                      Criado por {convite.criadoPor.name}
+                      <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">Criado por {convite.criadoPor.name}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <div className="text-xs text-gray-400">
-                      Criado em {formatDate(convite.createdAt)}
+                  {/* Informações adicionais */}
+                  {convite.maxMembers && (
+                    <div className="pt-2 border-t border-gray-100">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <UserPlus className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">Limite: {convite.maxMembers} membros</span>
+                      </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setViewingConvite(convite)}
-                        title="Visualizar convite"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingConvite(convite)}
-                        disabled={convite.usado}
-                        title="Editar convite"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {!convite.usado && new Date(convite.expiresAt) >= new Date() && (
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="pt-4 border-t border-gray-200">
+                    {/* Grid de botões centralizados */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {/* Visualizar */}
+                      <Tooltip content="Visualizar detalhes" side="top">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openConfirmationDialog('resend', convite)}
-                          title="Reenviar convite"
-                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => setViewingConvite(convite)}
+                          className="w-full h-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex items-center justify-center p-0"
                         >
-                          <Send className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </Button>
+                      </Tooltip>
+
+                      {/* Editar */}
+                      <Tooltip content="Editar convite" side="top">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingConvite(convite)}
+                          disabled={convite.usado}
+                          className="w-full h-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex items-center justify-center p-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Tooltip>
+
+                      {/* Reenviar/Excluir baseado no status */}
+                      {!convite.usado && new Date(convite.expiresAt) >= new Date() ? (
+                        /* Reenviar */
+                        <Tooltip content="Reenviar convite" side="top">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openConfirmationDialog('resend', convite)}
+                            className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-0"
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
+                      ) : (
+                        /* Excluir */
+                        <Tooltip content="Excluir convite" side="top">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openConfirmationDialog('delete', convite)}
+                            disabled={convite.usado}
+                            className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openConfirmationDialog('delete', convite)}
-                        className="text-red-600 hover:text-red-700"
-                        disabled={convite.usado}
-                        title="Excluir convite"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
+                  </div>
+
+                  <div className="text-xs text-gray-400">
+                    Criado em {formatDate(convite.createdAt)}
                   </div>
                 </CardContent>
               </Card>
@@ -608,3 +636,4 @@ export default function ConvitesPage() {
     </div>
   )
 }
+
