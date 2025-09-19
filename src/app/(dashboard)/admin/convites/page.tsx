@@ -467,39 +467,54 @@ export default function ConvitesPage() {
                       </div>
 
                       {/* Reenviar/Excluir baseado no status */}
-                      {!convite.usado && new Date(convite.expiresAt) >= new Date() ? (
+                      {(() => {
+                        const isUsado = convite.usado
+                        const isExpired = new Date(convite.expiresAt) < new Date()
+                        const canResend = !isUsado && !isExpired
+                        
+                        console.log('Status do convite:', {
+                          id: convite.id,
+                          usado: isUsado,
+                          expirado: isExpired,
+                          podeReenviar: canResend,
+                          expiresAt: convite.expiresAt
+                        })
+                        
+                        return canResend
+                      })() ? (
                         /* Reenviar */
-                        <div className="relative group">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openConfirmationDialog('resend', convite)}
-                            className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-0"
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                            Reenviar convite
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                          </div>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            console.log('Botão reenviar clicado para convite:', convite.id)
+                            openConfirmationDialog('resend', convite)
+                          }}
+                          className="w-full h-10 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center justify-center p-2"
+                          title="Reenviar convite"
+                        >
+                          <Send className="h-4 w-4 mr-1" />
+                          <span className="text-xs">Reenviar</span>
+                        </Button>
                       ) : (
                         /* Excluir */
-                        <div className="relative group">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openConfirmationDialog('delete', convite)}
-                            disabled={convite.usado}
-                            className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                            Excluir convite
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                          </div>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            openConfirmationDialog('delete', convite)
+                          }}
+                          disabled={convite.usado}
+                          className="w-full h-10 text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Excluir convite"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          <span className="text-xs">Excluir</span>
+                        </Button>
                       )}
                     </div>
                   </div>
