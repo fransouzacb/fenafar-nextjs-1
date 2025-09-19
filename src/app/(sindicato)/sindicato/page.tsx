@@ -36,19 +36,34 @@ export default function SindicatoDashboard() {
     try {
       setLoading(true)
       
-      // Simular carregamento de estatísticas
-      // TODO: Implementar API real
-      const mockStats: SindicatoStats = {
+      const response = await fetch('/api/sindicato/stats', {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar estatísticas')
+      }
+
+      const data = await response.json()
+      
+      setStats({
+        totalMembros: data.totalMembros,
+        totalDocumentos: data.totalDocumentos,
+        convitesPendentes: data.convitesPendentes,
+        ultimaAtividade: data.ultimaAtividade,
+        status: data.status
+      })
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error)
+      
+      // Fallback para dados mock em caso de erro
+      setStats({
         totalMembros: 0,
         totalDocumentos: 0,
         convitesPendentes: 0,
         ultimaAtividade: 'Nenhuma atividade recente',
         status: 'PENDING'
-      }
-      
-      setStats(mockStats)
-    } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error)
+      })
     } finally {
       setLoading(false)
     }
