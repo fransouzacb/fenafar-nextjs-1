@@ -25,6 +25,7 @@ model User {
   sindicato     Sindicato? @relation("SindicatoAdmin")
   convites      Convite[] @relation("CriadoPor")
   documentos    Documento[]
+  emailTemplates EmailTemplate[] @relation("EmailTemplateCreatedBy")
   
   @@map("users")
 }
@@ -119,4 +120,30 @@ enum DocumentoTipo {
   ACT      // Acordo Coletivo de Trabalho
   AVATAR   // Foto de perfil
   OUTRO    // Outros documentos
+}
+
+enum EmailTemplateType {
+  convite_sindicato
+  convite_membro
+  notificacao
+  custom
+}
+
+model EmailTemplate {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  subject     String
+  htmlContent String            @db.Text
+  textContent String?           @db.Text
+  variables   String[]          // Array de variáveis disponíveis
+  type        EmailTemplateType
+  isActive    Boolean           @default(true)
+  createdById String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relacionamentos
+  createdBy   User              @relation("EmailTemplateCreatedBy", fields: [createdById], references: [id])
+
+  @@map("email_templates")
 }

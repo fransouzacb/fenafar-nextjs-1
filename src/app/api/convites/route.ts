@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { getAuthUser, hasRole } from '@/lib/auth'
+import { sendConviteEmail } from '@/lib/email'
 
 // GET /api/convites - Listar convites
 export async function GET(request: NextRequest) {
@@ -113,6 +114,31 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    // Enviar e-mail do convite
+    try {
+      const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${token}`
+      const expiraEm = expiresAt.toLocaleDateString('pt-BR')
+      
+      const emailResult = await sendConviteEmail({
+        to: data.email,
+        nomeSindicato: newConvite.sindicato?.name,
+        cnpjSindicato: newConvite.sindicato?.cnpj,
+        linkConvite,
+        expiraEm,
+        criadoPor: user.name || user.email,
+        maxMembers: data.maxMembers,
+        tipoConvite: data.role
+      })
+
+      if (!emailResult.success) {
+        console.error('Erro ao enviar e-mail do convite:', emailResult.error)
+        // Não falhar a criação do convite se o e-mail falhar
+      }
+    } catch (emailError) {
+      console.error('Erro ao enviar e-mail do convite:', emailError)
+      // Não falhar a criação do convite se o e-mail falhar
+    }
 
     return NextResponse.json(newConvite, { status: 201 })
   } catch (error: any) {

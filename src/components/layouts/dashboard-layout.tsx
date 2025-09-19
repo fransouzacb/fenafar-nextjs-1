@@ -54,6 +54,12 @@ const menuItems = [
     roles: ['FENAFAR_ADMIN', 'SINDICATO_ADMIN']
   },
   {
+    name: 'Templates de E-mail',
+    href: '/admin/email-templates',
+    icon: FileText,
+    roles: ['FENAFAR_ADMIN']
+  },
+  {
     name: 'Configurações',
     href: '/admin/configuracoes',
     icon: Settings,
