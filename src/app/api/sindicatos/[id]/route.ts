@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 
 // GET /api/sindicatos/[id] - Buscar sindicato por ID
 export async function GET(
@@ -19,7 +20,6 @@ export async function GET(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(
@@ -122,7 +122,6 @@ export async function PUT(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(
@@ -266,7 +265,6 @@ export async function DELETE(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(
