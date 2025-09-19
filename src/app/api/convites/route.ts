@@ -91,7 +91,10 @@ export async function POST(request: NextRequest) {
 
     const newConvite = await prisma.convite.create({
       data: {
-        ...data,
+        email: data.email,
+        role: data.role,
+        sindicatoId: data.sindicatoId || null,
+        maxMembers: data.maxMembers || null,
         token,
         expiresAt,
         criadoPorId: user.id,
