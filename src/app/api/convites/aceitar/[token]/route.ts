@@ -15,14 +15,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Token do convite é obrigatório' },
+        { error: 'ID do convite é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Buscar convite pelo token
+    // Buscar convite pelo ID
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: {
           select: {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Buscar convite
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: true
       }
