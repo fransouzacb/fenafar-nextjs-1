@@ -264,7 +264,7 @@ export async function sendEmail(emailData: EmailData): Promise<{ success: boolea
     
     return {
       success: true,
-      messageId: result.body?.messageId
+      messageId: result.body?.messageId || 'unknown'
     }
   } catch (error) {
     console.error('Erro ao enviar e-mail:', error)

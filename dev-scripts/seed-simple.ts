@@ -33,9 +33,6 @@ async function createSampleData() {
     try {
       await prisma.convite.deleteMany()
       await prisma.documento.deleteMany()
-      await prisma.user.updateMany({
-        data: { sindicatoId: null }
-      })
       await prisma.sindicato.deleteMany()
       await prisma.user.deleteMany()
       console.log('✅ Dados limpos')
@@ -57,7 +54,22 @@ async function createSampleData() {
     })
     console.log('✅ Admin FENAFAR criado:', adminUser.email)
     
-    // 2. Criar sindicato de exemplo
+    // 2. Criar admin de sindicato
+    console.log('👤 Criando admin de sindicato...')
+    const sindicatoAdmin = await prisma.user.create({
+      data: {
+        email: 'admin@sindfarmsp.com.br',
+        name: 'Carlos Silva',
+        phone: '(11) 98765-4321',
+        role: 'SINDICATO_ADMIN',
+        active: true,
+        cpf: '123.456.789-00',
+        cargo: 'Presidente'
+      }
+    })
+    console.log('✅ Admin de sindicato criado:', sindicatoAdmin.email)
+    
+    // 3. Criar sindicato de exemplo
     console.log('🏢 Criando sindicato de exemplo...')
     const sindicato = await prisma.sindicato.create({
       data: {
@@ -71,27 +83,11 @@ async function createSampleData() {
         phone: '(11) 1234-5678',
         website: 'https://sindfarmsp.com.br',
         description: 'Sindicato representativo dos farmacêuticos da região metropolitana de São Paulo',
-        active: true
+        active: true,
+        adminId: sindicatoAdmin.id
       }
     })
     console.log('✅ Sindicato criado:', sindicato.name)
-    
-    // 3. Criar usuário admin do sindicato
-    console.log('👤 Criando admin do sindicato...')
-    const sindicatoAdmin = await prisma.user.create({
-      data: {
-        id: '123e4567-e89b-12d3-a456-426614174001', // ID fixo para testes
-        email: 'admin@sindfarmsp.com.br',
-        name: 'João Silva',
-        role: 'SINDICATO_ADMIN',
-        emailConfirmed: true,
-        active: true,
-        sindicatoId: sindicato.id,
-        cpf: '123.456.789-01',
-        cargo: 'Presidente'
-      }
-    })
-    console.log('✅ Admin sindicato criado:', sindicatoAdmin.email)
     
     // 4. Criar membro do sindicato
     console.log('👤 Criando membro do sindicato...')
@@ -113,17 +109,18 @@ async function createSampleData() {
     console.log('📄 Criando documento de exemplo...')
     const documento = await prisma.documento.create({
       data: {
-        name: 'Convenção Coletiva de Trabalho 2024',
+        titulo: 'Convenção Coletiva de Trabalho 2024',
         tipo: 'CCT',
-        description: 'Convenção Coletiva de Trabalho dos Farmacêuticos para o ano de 2024',
-        fileUrl: 'https://exemplo.com/cct-2024.pdf',
-        fileSize: 2048000,
+        arquivo: 'https://exemplo.com/cct-2024.pdf',
+        tamanho: 2048000,
         mimeType: 'application/pdf',
-        sindicatoId: sindicato.id,
-        active: true
+        ativo: true,
+        sindicato: {
+          connect: { id: sindicato.id }
+        }
       }
     })
-    console.log('✅ Documento criado:', documento.name)
+    console.log('✅ Documento criado:', documento.titulo)
     
     // 6. Criar convite de exemplo
     console.log('✉️ Criando convite de exemplo...')
@@ -132,9 +129,10 @@ async function createSampleData() {
         email: 'novo-sindicato@exemplo.com.br',
         role: 'SINDICATO_ADMIN',
         sindicatoId: null, // Convite para criar novo sindicato
-        invitedBy: adminUser.id,
+        token: 'token-exemplo-123',
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
-        active: true
+        usado: false,
+        criadoPorId: adminUser.id
       }
     })
     console.log('✅ Convite criado para:', convite.email)
@@ -145,7 +143,7 @@ async function createSampleData() {
     console.log(`✅ 1 Sindicato: ${sindicato.name}`)
     console.log(`✅ 1 Admin Sindicato: ${sindicatoAdmin.email}`)
     console.log(`✅ 1 Membro: ${membro.email}`)
-    console.log(`✅ 1 Documento: ${documento.name}`)
+    console.log(`✅ 1 Documento: ${documento.titulo}`)
     console.log(`✅ 1 Convite: ${convite.email}`)
     
     console.log('\n🔑 Credenciais para teste:')

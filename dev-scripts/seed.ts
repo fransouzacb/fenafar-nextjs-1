@@ -223,15 +223,15 @@ async function createMembros(users: any[], sindicatos: any[]) {
     const sindicato = sindicatos[i % sindicatos.length] // Distribuir entre sindicatos
     
     try {
-      // Atualizar o usuário com o sindicatoId
-      const updatedMember = await prisma.user.update({
-        where: { id: member.id },
-        data: {
-          sindicatoId: sindicato.id
-        }
-      })
+      // Campo sindicatoId não existe mais no schema
+      // const updatedMember = await prisma.user.update({
+      //   where: { id: member.id },
+      //   data: {
+      //     sindicatoId: sindicato.id
+      //   }
+      // })
 
-      createdMembros.push(updatedMember)
+      createdMembros.push(member)
       console.log(`✅ Membro criado: ${member.name} em ${sindicato.name}`)
       
     } catch (error) {
@@ -252,14 +252,15 @@ async function createDocumentos(sindicatos: any[]) {
       try {
         const documento = await prisma.documento.create({
           data: {
-            name: docData.name,
+            titulo: docData.name,
             tipo: docData.tipo,
-            description: docData.description,
-            fileUrl: docData.fileUrl,
-            fileSize: docData.fileSize,
+            arquivo: docData.fileUrl,
+            tamanho: docData.fileSize,
             mimeType: docData.mimeType,
-            sindicatoId: sindicato.id,
-            active: true
+            ativo: true,
+            sindicato: {
+              connect: { id: sindicato.id }
+            }
           }
         })
 
@@ -303,9 +304,10 @@ async function createConvites(users: any[], sindicatos: any[]) {
           email,
           role: 'MEMBER',
           sindicatoId: sindicatos[0]?.id, // Associar ao primeiro sindicato se existir
-          invitedBy: admin.id,
+          token: `token-${Math.random().toString(36).substr(2, 9)}`,
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
-          active: true
+          usado: false,
+          criadoPorId: admin.id
         }
       })
 
@@ -328,10 +330,6 @@ async function main() {
     console.log('🧹 Limpando dados existentes...')
     await prisma.convite.deleteMany()
     await prisma.documento.deleteMany()
-    // Limpar relacionamentos de sindicato dos usuários
-    await prisma.user.updateMany({
-      data: { sindicatoId: null }
-    })
     await prisma.sindicato.deleteMany()
     await prisma.user.deleteMany()
     console.log('✅ Dados limpos\n')

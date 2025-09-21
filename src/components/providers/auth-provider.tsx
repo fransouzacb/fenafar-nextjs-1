@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
-import { AuthUser, AuthState, AuthContextType, LoginRequest, RegisterRequest, TokenPayload } from '@/types/auth'
+import { User, AuthState, AuthContextType, LoginRequest, RegisterRequest, TokenPayload } from '@/types/auth'
 import { UserRole } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const updateProfile = async (data: Partial<AuthUser>) => {
+  const updateProfile = async (data: Partial<User>) => {
     try {
       if (typeof window === 'undefined') throw new Error('Token não encontrado')
       const token = localStorage.getItem('access_token')

@@ -18,7 +18,6 @@ import {
   UserPlus,
   Building2,
   Calendar,
-  AlertCircle,
   Eye,
   Send
 } from 'lucide-react'
@@ -59,9 +58,9 @@ interface Sindicato {
 }
 
 export default function ConvitesPage() {
-  const { user } = useAuthSimple()
+  // const { user } = useAuthSimple()
   const [convites, setConvites] = useState<Convite[]>([])
-  const [sindicatos, setSindicatos] = useState<Sindicato[]>([])
+  // const [sindicatos, setSindicatos] = useState<Sindicato[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -115,7 +114,7 @@ export default function ConvitesPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setSindicatos(data.sindicatos || [])
+        // setSindicatos(data.sindicatos || [])
       }
     } catch (error) {
       console.error('Erro ao carregar sindicatos:', error)

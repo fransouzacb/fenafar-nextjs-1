@@ -292,19 +292,17 @@ async function createDocumentos(sindicatos: any[], membros: any[]) {
     
     const documentos = [
       {
-        name: `CCT ${sindicato.state} 2024`,
-        description: `Convenção Coletiva de Trabalho ${sindicato.state} para o ano de 2024`,
+        titulo: `CCT ${sindicato.state} 2024`,
         tipo: 'CCT' as DocumentoTipo,
-        fileUrl: `/documentos/cct_${sindicato.state.toLowerCase()}_2024.pdf`,
-        fileSize: 2048576,
+        arquivo: `/documentos/cct_${sindicato.state.toLowerCase()}_2024.pdf`,
+        tamanho: 2048576,
         mimeType: 'application/pdf'
       },
       {
-        name: `ACT ${sindicato.state} 2024`,
-        description: `Acordo Coletivo de Trabalho ${sindicato.state} para o ano de 2024`,
+        titulo: `ACT ${sindicato.state} 2024`,
         tipo: 'ACT' as DocumentoTipo,
-        fileUrl: `/documentos/act_${sindicato.state.toLowerCase()}_2024.pdf`,
-        fileSize: 1536000,
+        arquivo: `/documentos/act_${sindicato.state.toLowerCase()}_2024.pdf`,
+        tamanho: 1536000,
         mimeType: 'application/pdf'
       }
     ]
@@ -321,10 +319,10 @@ async function createDocumentos(sindicatos: any[], membros: any[]) {
         })
 
         createdDocumentos.push(documento)
-        console.log(`✅ Documento criado: ${docData.name}`)
+        console.log(`✅ Documento criado: ${docData.titulo}`)
         
       } catch (error) {
-        console.error(`❌ Erro ao criar documento ${docData.name}:`, error)
+        console.error(`❌ Erro ao criar documento ${docData.titulo}:`, error)
       }
     }
   }
@@ -353,9 +351,14 @@ async function createConvites() {
       const convite = await prisma.convite.create({
         data: {
           email: conviteData.email,
+          token: `token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           role: 'SINDICATO_ADMIN' as UserRole, // Definir role para o convite
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
-          invitedBy: fenafarAdmin.id
+          criadoPor: {
+            connect: {
+              id: fenafarAdmin.id
+            }
+          }
         }
       })
 

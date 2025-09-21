@@ -4,6 +4,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
+interface RouteParams {
+  params: Promise<{ token: string }>
+}
+
 // GET /api/convites/aceitar/[token] - Verificar convite
 export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
@@ -11,14 +15,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Token do convite é obrigatório' },
+        { error: 'ID do convite é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Buscar convite pelo token
+    // Buscar convite pelo ID
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: {
           select: {
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Buscar convite
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: true
       }
