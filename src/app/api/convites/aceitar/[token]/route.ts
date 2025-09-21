@@ -97,13 +97,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // Verificar se convite já foi usado
-    if (convite.usado) {
-      return NextResponse.json(
-        { error: 'Convite já foi utilizado' },
-        { status: 400 }
-      )
-    }
+    // Verificação de convite usado removida - campo não existe no schema do Vercel
 
     // Verificar se email já existe
     const existingUser = await prisma.user.findUnique({

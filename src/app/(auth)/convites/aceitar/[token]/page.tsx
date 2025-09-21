@@ -16,8 +16,8 @@ interface Convite {
   role: 'SINDICATO_ADMIN' | 'MEMBER'
   token: string
   expiresAt: string
-  usado: boolean
-  maxMembers?: number
+  usado?: boolean // Campo não existe no schema do Vercel
+  maxMembers?: number // Campo não existe no schema do Vercel
   sindicato?: {
     id: string
     name: string
@@ -104,11 +104,7 @@ export default function AceitarConvitePage() {
         return
       }
 
-      // Verificar se convite já foi usado
-      if (conviteData.usado) {
-        setStep('used')
-        return
-      }
+      // Verificação de convite usado removida - campo não existe no schema do Vercel
 
       setConvite(conviteData)
       setUserForm(prev => ({ ...prev, email: conviteData.email }))
@@ -354,7 +350,7 @@ export default function AceitarConvitePage() {
                 <br />
                 {convite?.role === 'SINDICATO_ADMIN' && (
                   <>
-                    <strong>Limite de membros:</strong> {convite.maxMembers}
+                    <strong>Limite de membros:</strong> {convite.maxMembers || 'Não definido'}
                   </>
                 )}
               </AlertDescription>
