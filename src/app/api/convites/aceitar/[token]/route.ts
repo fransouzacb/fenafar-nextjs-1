@@ -184,7 +184,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             city: sindicatoData.cidade || null,
             state: sindicatoData.estado || null,
             zipCode: sindicatoData.cep || null,
-            maxMembers: convite.maxMembers || 100,
             active: true,
             adminId: newUser.id
           }
