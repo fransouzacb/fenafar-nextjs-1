@@ -203,7 +203,6 @@ export async function PATCH(
         email: true,
         role: true,
         expiresAt: true,
-        usado: true,
         maxMembers: true,
         sindicato: {
           select: {
@@ -229,12 +228,7 @@ export async function PATCH(
       )
     }
 
-    if (convite.usado) {
-      return NextResponse.json(
-        { error: 'Convite já foi utilizado' },
-        { status: 400 }
-      )
-    }
+    // Verificação de convite usado removida - campo não existe no schema do Vercel
 
     if (new Date() > convite.expiresAt) {
       return NextResponse.json(
