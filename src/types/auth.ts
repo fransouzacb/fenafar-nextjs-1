@@ -18,7 +18,7 @@ export interface User {
   } | null
 }
 
-export interface AuthUser extends User {}
+export type AuthUser = User
 
 export interface LoginRequest {
   email: string
