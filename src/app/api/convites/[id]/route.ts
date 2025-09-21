@@ -91,11 +91,7 @@ export async function PUT(
     const data = await request.json()
 
     const updatedConvite = await prisma.convite.update({
-<<<<<<< HEAD
       where: { id },
-=======
-      where: { id: (await params).id },
->>>>>>> 99657c93a20c7d263a1b12685e3aff301f0e5081
       data,
       include: {
         sindicato: {
@@ -156,11 +152,7 @@ export async function DELETE(
     const { id } = await params
 
     await prisma.convite.delete({
-<<<<<<< HEAD
       where: { id }
-=======
-      where: { id: (await params).id }
->>>>>>> 99657c93a20c7d263a1b12685e3aff301f0e5081
     })
 
     return NextResponse.json({ message: 'Convite excluído com sucesso' })
@@ -205,19 +197,8 @@ export async function PATCH(
 
     // Buscar o convite existente
     const convite = await prisma.convite.findUnique({
-<<<<<<< HEAD
       where: { id },
       include: {
-=======
-      where: { id: (await params).id },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        expiresAt: true,
-        usado: true,
-        maxMembers: true,
->>>>>>> 99657c93a20c7d263a1b12685e3aff301f0e5081
         sindicato: {
           select: {
             id: true,
