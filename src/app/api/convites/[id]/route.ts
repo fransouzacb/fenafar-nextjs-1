@@ -195,7 +195,6 @@ export async function PATCH(
         id: true,
         email: true,
         role: true,
-        token: true,
         expiresAt: true,
         usado: true,
         maxMembers: true,
@@ -239,7 +238,7 @@ export async function PATCH(
 
     // Reenviar e-mail do convite
     try {
-      const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${convite.token}`
+      const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${convite.id}`
       const expiraEm = new Date(convite.expiresAt).toLocaleDateString('pt-BR')
       
       console.log('📧 Reenviando e-mail do convite:', {
