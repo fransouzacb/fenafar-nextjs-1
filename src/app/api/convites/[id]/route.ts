@@ -198,7 +198,13 @@ export async function PATCH(
     // Buscar o convite existente
     const convite = await prisma.convite.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        expiresAt: true,
+        usado: true,
+        maxMembers: true,
         sindicato: {
           select: {
             id: true,
