@@ -57,7 +57,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (user.role === UserRole.SINDICATO_ADMIN) {
       // Verificar se o documento pertence ao sindicato que o usuário administra
-      hasAccess = documento.sindicato.admin.id === user.id
+      hasAccess = documento.sindicato.admin?.id === user.id
     } else if (user.role === UserRole.MEMBER) {
       // Verificar se o documento foi criado pelo próprio usuário
       // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
