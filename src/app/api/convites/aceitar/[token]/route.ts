@@ -202,11 +202,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
       }
 
-      // Marcar convite como usado
-      await tx.convite.update({
-        where: { id: convite.id },
-        data: { usado: true }
-      })
+      // Marcar convite como usado - campo não existe no schema do Vercel
+      // await tx.convite.update({
+      //   where: { id: convite.id },
+      //   data: { usado: true }
+      // })
 
       return { user: newUser, sindicato: newSindicato }
     })
