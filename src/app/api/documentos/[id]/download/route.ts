@@ -83,7 +83,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Gerar URL assinada para download (válida por 1 hora)
     const { data: signedUrl, error: urlError } = await supabaseAdmin.storage
       .from('fenafar-documents')
-      .createSignedUrl(documento.arquivo, 3600) // 1 hora
+      .createSignedUrl(documento.fileUrl, 3600) // 1 hora
 
     if (urlError) {
       console.error('❌ Erro ao gerar URL assinada:', urlError)
