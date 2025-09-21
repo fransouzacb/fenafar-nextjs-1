@@ -185,7 +185,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             state: sindicatoData.estado || null,
             zipCode: sindicatoData.cep || null,
             active: true,
-            adminId: newUser.id
+            admin: {
+              connect: { id: newUser.id }
+            }
           }
         })
 
