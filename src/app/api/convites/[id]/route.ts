@@ -203,7 +203,6 @@ export async function PATCH(
         email: true,
         role: true,
         expiresAt: true,
-        maxMembers: true,
         sindicato: {
           select: {
             id: true,
@@ -256,7 +255,7 @@ export async function PATCH(
         linkConvite,
         expiraEm,
         criadoPor: convite.criadoPor?.name || convite.criadoPor?.email || 'Administrador',
-        maxMembers: convite.maxMembers || undefined,
+        maxMembers: undefined, // Campo não existe no schema do Vercel
         tipoConvite: convite.role as 'SINDICATO_ADMIN' | 'MEMBER'
       })
 
