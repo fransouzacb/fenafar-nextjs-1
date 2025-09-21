@@ -94,11 +94,11 @@ export async function POST(request: NextRequest) {
         email: data.email,
         role: data.role,
         sindicatoId: data.sindicatoId || null,
-        maxMembers: data.maxMembers || null,
+        // maxMembers: data.maxMembers || null, // Campo não existe no schema do Vercel
         token,
         expiresAt,
         criadoPorId: user.id,
-        usado: false
+        // usado: false // Campo não existe no schema do Vercel
       },
       include: {
         sindicato: {
