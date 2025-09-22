@@ -55,8 +55,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (user.role === UserRole.SINDICATO_ADMIN) {
       // Verificar se o documento pertence ao sindicato que o usuário administra
-      const sindicato = await prisma.sindicato.findUnique({
-        where: { adminId: user.id },
+      const sindicato = await prisma.sindicato.findFirst({
+        where: { 
+          admin: {
+            id: user.id
+          }
+        },
         select: { id: true }
       })
       hasAccess = sindicato?.id === documento.sindicatoId
