@@ -67,7 +67,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     } else if (user.role === UserRole.MEMBER) {
       // Verificar se o documento foi criado pelo próprio usuário
       // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
-      hasAccess = documento.userId === user.id
+      // Campo 'userId' não existe no schema do Vercel - temporariamente desabilitado
+      hasAccess = false // (documento as any).userId === user.id
     }
 
     if (!hasAccess) {
