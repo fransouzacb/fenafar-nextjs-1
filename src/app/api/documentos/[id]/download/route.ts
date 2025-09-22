@@ -81,9 +81,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Gerar URL assinada para download (válida por 1 hora)
+    // Usar type assertion para compatibilidade entre schemas local/Vercel
+    const filePath = (documento as any).fileUrl || (documento as any).arquivo
     const { data: signedUrl, error: urlError } = await supabaseAdmin.storage
       .from('fenafar-documents')
-      .createSignedUrl(documento.fileUrl, 3600) // 1 hora
+      .createSignedUrl(filePath, 3600) // 1 hora
 
     if (urlError) {
       console.error('❌ Erro ao gerar URL assinada:', urlError)
@@ -96,8 +98,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       success: true,
       downloadUrl: signedUrl.signedUrl,
-      fileName: documento.titulo,
-      fileSize: documento.tamanho,
+      fileName: (documento as any).name || (documento as any).titulo, // Compatibilidade entre schemas
+      fileSize: (documento as any).fileSize || (documento as any).tamanho, // Compatibilidade entre schemas
       mimeType: documento.mimeType,
       expiresAt: new Date(Date.now() + 3600 * 1000) // 1 hora a partir de agora
     })
