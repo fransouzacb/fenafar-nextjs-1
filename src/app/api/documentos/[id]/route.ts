@@ -38,14 +38,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             name: true,
             cnpj: true
           }
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
         }
+        // Campo 'user' não existe no schema do Vercel - removido para compatibilidade
       }
     })
 
@@ -168,14 +162,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             name: true,
             cnpj: true
           }
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
         }
+        // Campo 'user' não existe no schema do Vercel - removido para compatibilidade
       }
     })
 
