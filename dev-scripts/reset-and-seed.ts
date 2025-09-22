@@ -1,9 +1,12 @@
 #!/usr/bin/env tsx
 
 /**
- * Script de Seed para Schema Correto
+ * Script para Reset Completo + Seeds
  * 
- * Este script popula o banco com dados de teste usando o schema correto
+ * Este script:
+ * 1. Limpa todos os dados do banco
+ * 2. Remove usuários do Supabase Auth
+ * 3. Cria dados de teste frescos
  */
 
 import { PrismaClient, UserRole, DocumentoTipo } from '@prisma/client'
@@ -90,18 +93,31 @@ const testSindicatos = [
   }
 ]
 
+const testConvites = [
+  {
+    email: 'convidado1@teste.com',
+    sindicatoName: 'Sindicato dos Farmacêuticos de MG',
+    sindicatoCnpj: '11.222.333/0001-44'
+  },
+  {
+    email: 'convidado2@teste.com',
+    sindicatoName: 'Sindicato dos Farmacêuticos do ES',
+    sindicatoCnpj: '55.666.777/0001-88'
+  }
+]
+
 async function cleanAll() {
   console.log('🧹 Limpando todos os dados...')
   
   // Limpar banco de dados
   await prisma.convite.deleteMany()
   await prisma.documento.deleteMany()
-  await prisma.membro.deleteMany()
   await prisma.sindicato.deleteMany()
   await prisma.user.deleteMany()
   
   // Tentar limpar usuários do Supabase Auth
   try {
+    // Listar usuários existentes
     const { data: users, error } = await supabase.auth.admin.listUsers()
     
     if (!error && users?.users) {
@@ -202,9 +218,9 @@ async function createSindicatos(users: any[]) {
           website: sindicatoData.website,
           description: sindicatoData.description,
           active: true,
-          status: 'APPROVED',
-          approvedAt: new Date(),
-          adminId: admin.id
+          admin: {
+            connect: { id: admin.id }
+          }
         }
       })
 
@@ -221,7 +237,7 @@ async function createSindicatos(users: any[]) {
 }
 
 async function createMembros(users: any[], sindicatos: any[]) {
-  console.log('👥 Criando membros de teste...')
+  console.log('👥 Atualizando membros com dados de sindicatos...')
   
   if (sindicatos.length === 0) {
     console.error('❌ Nenhum sindicato encontrado para associar membros!')
@@ -229,38 +245,35 @@ async function createMembros(users: any[], sindicatos: any[]) {
   }
   
   const members = users.filter(u => u.role === 'MEMBER')
-  const createdMembros = []
+  const updatedMembros = []
   
-  console.log(`📋 Membros para criar: ${members.length}`)
+  console.log(`📋 Membros para atualizar: ${members.length}`)
   
   for (let i = 0; i < members.length; i++) {
     const memberData = members[i]
     const sindicato = sindicatos[i % sindicatos.length] // Distribuir entre sindicatos
     
     try {
-      const membro = await prisma.membro.create({
+      // Atualizar o usuário membro com dados adicionais e associação ao sindicato
+      const membro = await prisma.user.update({
+        where: { id: memberData.id },
         data: {
-          nome: memberData.name,
           cpf: `${String(111 + i).padStart(3, '0')}.${String(222 + i).padStart(3, '0')}.${String(333 + i).padStart(3, '0')}-${String(10 + i).padStart(2, '0')}`,
-          email: memberData.email,
-          telefone: memberData.phone,
-          cargo: i === 0 ? 'Farmacêutico Responsável' : i === 1 ? 'Técnico em Farmácia' : 'Auxiliar de Farmácia',
-          ativo: true,
-          userId: memberData.id,
-          sindicatoId: sindicato.id
+          cargo: i === 0 ? 'Farmacêutico Responsável' : i === 1 ? 'Técnico em Farmácia' : 'Auxiliar de Farmácia'
+          // Note: não podemos conectar ao sindicato aqui pois User.sindicatoId é para admins
         }
       })
 
-      createdMembros.push(membro)
-      console.log(`✅ Membro criado: ${memberData.name}`)
+      updatedMembros.push(membro)
+      console.log(`✅ Membro atualizado: ${memberData.name}`)
       
     } catch (error) {
-      console.error(`❌ Erro ao criar membro ${memberData.name}:`, error)
+      console.error(`❌ Erro ao atualizar membro ${memberData.name}:`, error)
     }
   }
   
-  console.log(`📊 Total de membros criados: ${createdMembros.length}`)
-  return createdMembros
+  console.log(`📊 Total de membros atualizados: ${updatedMembros.length}`)
+  return updatedMembros
 }
 
 async function createDocumentos(sindicatos: any[], membros: any[]) {
@@ -283,27 +296,26 @@ async function createDocumentos(sindicatos: any[], membros: any[]) {
         tipo: 'CCT' as DocumentoTipo,
         arquivo: `/documentos/cct_${sindicato.state.toLowerCase()}_2024.pdf`,
         tamanho: 2048576,
-        mimeType: 'application/pdf',
-        versao: '1.0',
-        ativo: true,
-        sindicatoId: sindicato.id
+        mimeType: 'application/pdf'
       },
       {
         titulo: `ACT ${sindicato.state} 2024`,
         tipo: 'ACT' as DocumentoTipo,
         arquivo: `/documentos/act_${sindicato.state.toLowerCase()}_2024.pdf`,
         tamanho: 1536000,
-        mimeType: 'application/pdf',
-        versao: '1.0',
-        ativo: true,
-        sindicatoId: sindicato.id
+        mimeType: 'application/pdf'
       }
     ]
     
     for (const docData of documentos) {
       try {
         const documento = await prisma.documento.create({
-          data: docData
+          data: {
+            ...docData,
+            sindicato: {
+              connect: { id: sindicato.id }
+            }
+          }
         })
 
         createdDocumentos.push(documento)
@@ -334,27 +346,19 @@ async function createConvites() {
   
   const createdConvites = []
   
-  const testConvites = [
-    {
-      email: 'convidado1@teste.com',
-      role: 'SINDICATO_ADMIN' as UserRole
-    },
-    {
-      email: 'convidado2@teste.com',
-      role: 'SINDICATO_ADMIN' as UserRole
-    }
-  ]
-  
   for (const conviteData of testConvites) {
     try {
       const convite = await prisma.convite.create({
         data: {
           email: conviteData.email,
-          token: `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          role: conviteData.role,
+          token: `token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          role: 'SINDICATO_ADMIN' as UserRole, // Definir role para o convite
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
-          usado: false,
-          criadoPorId: fenafarAdmin.id
+          criadoPor: {
+            connect: {
+              id: fenafarAdmin.id
+            }
+          }
         }
       })
 
@@ -372,7 +376,7 @@ async function createConvites() {
 
 async function main() {
   try {
-    console.log('🚀 Iniciando seed do Sistema FENAFAR com schema correto...\n')
+    console.log('🚀 Iniciando reset completo + seeds do Sistema FENAFAR...\n')
 
     await cleanAll()
     
@@ -394,7 +398,7 @@ async function main() {
     console.log(`📄 Documentos: ${documentos.length}`)
     console.log(`📧 Convites: ${convites.length}`)
 
-    console.log('\n✅ Seed executado com sucesso!')
+    console.log('\n✅ Reset + Seeds executados com sucesso!')
 
     console.log('\n🔑 CREDENCIAIS DE TESTE:')
     console.log('Admin FENAFAR: admin@fenafar.com.br / admin123')
@@ -415,5 +419,3 @@ async function main() {
 if (require.main === module) {
   main()
 }
-
-export { main as seedCorrectSchema }

@@ -16,7 +16,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar se o usuário tem permissão
+<<<<<<< HEAD
     if (user.role !== UserRole.FENAFAR_ADMIN && user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
+=======
+    if (user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }

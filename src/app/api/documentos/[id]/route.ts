@@ -38,14 +38,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             name: true,
             cnpj: true
           }
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
         }
+        // Campo 'user' não existe no schema do Vercel - removido para compatibilidade
       }
     })
 
@@ -61,15 +55,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (user.role === UserRole.SINDICATO_ADMIN) {
       // Verificar se o documento pertence ao sindicato que o usuário administra
-      const sindicato = await prisma.sindicato.findUnique({
-        where: { adminId: user.id },
+      const sindicato = await prisma.sindicato.findFirst({
+        where: { 
+          admin: {
+            id: user.id
+          }
+        },
         select: { id: true }
       })
       hasAccess = sindicato?.id === documento.sindicatoId
     } else if (user.role === UserRole.MEMBER) {
       // Verificar se o documento foi criado pelo próprio usuário
       // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
-      hasAccess = documento.userId === user.id
+      // Campo 'userId' não existe no schema do Vercel - temporariamente desabilitado
+      hasAccess = false // (documento as any).userId === user.id
     }
 
     if (!hasAccess) {
@@ -168,14 +167,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             name: true,
             cnpj: true
           }
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
         }
+        // Campo 'user' não existe no schema do Vercel - removido para compatibilidade
       }
     })
 

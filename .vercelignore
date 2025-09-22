@@ -1,3 +1,24 @@
 # Scripts de desenvolvimento local
 scripts/
 dev-scripts/
+<<<<<<< HEAD
+=======
+
+# Arquivos de desenvolvimento
+*.sql
+*.mjs
+check-data.mjs
+sindicatos_rows.sql
+cookies.txt
+
+# Documentação
+docs/
+
+# Logs
+*.log
+erros_no_navegador.md
+
+# Arquivos temporários
+*.tmp
+*.temp
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577

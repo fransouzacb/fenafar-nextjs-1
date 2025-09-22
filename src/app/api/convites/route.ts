@@ -89,16 +89,16 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
 
-    const newConvite = await prisma.convite.create({
+    const newConvite = await (prisma as any).convite.create({
       data: {
         email: data.email,
         role: data.role,
         sindicatoId: data.sindicatoId || null,
-        maxMembers: data.maxMembers || null,
-        token,
+        // maxMembers: data.maxMembers || null, // Campo não existe no schema do Vercel
+        token, // Usar type assertion para contornar diferença de schema
         expiresAt,
         criadoPorId: user.id,
-        usado: false
+        // usado: false // Campo não existe no schema do Vercel
       },
       include: {
         sindicato: {

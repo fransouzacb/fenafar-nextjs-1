@@ -29,14 +29,13 @@ async function checkBrevoAccount() {
     try {
       const accountInfo = await accountApi.getAccount()
       console.log('✅ Conta verificada com sucesso!')
-      console.log(`📧 Email: ${accountInfo.email}`)
-      console.log(`🏢 Empresa: ${accountInfo.companyName}`)
-      console.log(`📊 Plano: ${accountInfo.plan?.type || 'N/A'}`)
+      console.log(`📧 Email: ${accountInfo.body.email}`)
+      console.log(`🏢 Empresa: ${accountInfo.body.companyName}`)
+      console.log(`📊 Plano: ${accountInfo.body.plan?.[0]?.type || 'N/A'}`)
       
       // Verificar se tem permissões transacionais
-      if (accountInfo.plan?.creditsType === 'sendLimit') {
-        console.log(`📈 Limite de envio: ${accountInfo.plan?.creditsLimit || 'N/A'}`)
-        console.log(`📉 Créditos restantes: ${accountInfo.plan?.creditsRemaining || 'N/A'}`)
+      if (accountInfo.body.plan?.[0]?.creditsType) {
+        console.log(`📈 Tipo de créditos: ${accountInfo.body.plan?.[0]?.creditsType}`)
       }
       
     } catch (accountError: any) {

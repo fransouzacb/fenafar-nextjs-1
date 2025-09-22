@@ -35,7 +35,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         sindicato: {
           select: {
             id: true,
-            adminId: true
+            admin: {
+              select: {
+                id: true
+              }
+            }
           }
         }
       }
@@ -53,11 +57,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (user.role === UserRole.SINDICATO_ADMIN) {
       // Verificar se o documento pertence ao sindicato que o usuário administra
-      hasAccess = documento.sindicato.adminId === user.id
+      hasAccess = documento.sindicato.admin?.id === user.id
     } else if (user.role === UserRole.MEMBER) {
       // Verificar se o documento foi criado pelo próprio usuário
       // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
-      hasAccess = documento.userId === user.id
+      // Campo userId não existe no schema do Vercel - comentado temporariamente
+      // hasAccess = documento.userId === user.id
+      hasAccess = false // Temporariamente negar acesso até schema ser atualizado
     }
 
     if (!hasAccess) {
@@ -75,9 +81,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Gerar URL assinada para download (válida por 1 hora)
+    // Usar type assertion para compatibilidade entre schemas local/Vercel
+    const filePath = (documento as any).fileUrl || (documento as any).arquivo
     const { data: signedUrl, error: urlError } = await supabaseAdmin.storage
       .from('fenafar-documents')
-      .createSignedUrl(documento.arquivo, 3600) // 1 hora
+      .createSignedUrl(filePath, 3600) // 1 hora
 
     if (urlError) {
       console.error('❌ Erro ao gerar URL assinada:', urlError)
@@ -90,8 +98,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       success: true,
       downloadUrl: signedUrl.signedUrl,
-      fileName: documento.titulo,
-      fileSize: documento.tamanho,
+      fileName: (documento as any).name || (documento as any).titulo, // Compatibilidade entre schemas
+      fileSize: (documento as any).fileSize || (documento as any).tamanho, // Compatibilidade entre schemas
       mimeType: documento.mimeType,
       expiresAt: new Date(Date.now() + 3600 * 1000) // 1 hora a partir de agora
     })

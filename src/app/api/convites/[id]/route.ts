@@ -27,6 +27,10 @@ export async function GET(
     }
 
     const { id } = await params
+<<<<<<< HEAD
+=======
+
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
     const convite = await prisma.convite.findUnique({
       where: { id },
       include: {
@@ -149,6 +153,10 @@ export async function DELETE(
     }
 
     const { id } = await params
+<<<<<<< HEAD
+=======
+
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
     await prisma.convite.delete({
       where: { id }
     })
@@ -191,11 +199,21 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     // Buscar o convite existente
     const { id } = await params
     const convite = await prisma.convite.findUnique({
       where: { id },
+<<<<<<< HEAD
       include: {
+=======
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        expiresAt: true,
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
         sindicato: {
           select: {
             id: true,
@@ -220,12 +238,7 @@ export async function PATCH(
       )
     }
 
-    if (convite.usado) {
-      return NextResponse.json(
-        { error: 'Convite já foi utilizado' },
-        { status: 400 }
-      )
-    }
+    // Verificação de convite usado removida - campo não existe no schema do Vercel
 
     if (new Date() > convite.expiresAt) {
       return NextResponse.json(
@@ -236,7 +249,7 @@ export async function PATCH(
 
     // Reenviar e-mail do convite
     try {
-      const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${convite.token}`
+      const linkConvite = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/convites/aceitar/${convite.id}`
       const expiraEm = new Date(convite.expiresAt).toLocaleDateString('pt-BR')
       
       console.log('📧 Reenviando e-mail do convite:', {
@@ -253,8 +266,13 @@ export async function PATCH(
         linkConvite,
         expiraEm,
         criadoPor: convite.criadoPor?.name || convite.criadoPor?.email || 'Administrador',
+<<<<<<< HEAD
          maxMembers: convite.maxMembers || undefined,
          tipoConvite: convite.role as 'SINDICATO_ADMIN' | 'MEMBER'
+=======
+        maxMembers: undefined, // Campo não existe no schema do Vercel
+        tipoConvite: convite.role as 'SINDICATO_ADMIN' | 'MEMBER'
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
       })
 
       console.log('📧 Resultado do reenvio:', emailResult)

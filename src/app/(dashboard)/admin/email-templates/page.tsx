@@ -438,7 +438,11 @@ export default function EmailTemplatesPage() {
         confirmText="Excluir"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
+<<<<<<< HEAD
         onOpenChange={(open) => !open && setConfirmationDialog({
+=======
+        onOpenChange={() => setConfirmationDialog({
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
           isOpen: false,
           template: null
         })}

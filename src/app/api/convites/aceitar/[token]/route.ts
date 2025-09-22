@@ -4,6 +4,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
+interface RouteParams {
+  params: Promise<{ token: string }>
+}
+
 // GET /api/convites/aceitar/[token] - Verificar convite
 export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
@@ -11,14 +15,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Token do convite é obrigatório' },
+        { error: 'ID do convite é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Buscar convite pelo token
+    // Buscar convite pelo ID
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: {
           select: {
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Buscar convite
     const convite = await prisma.convite.findUnique({
-      where: { token },
+      where: { id: token },
       include: {
         sindicato: true
       }
@@ -93,13 +97,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // Verificar se convite já foi usado
-    if (convite.usado) {
-      return NextResponse.json(
-        { error: 'Convite já foi utilizado' },
-        { status: 400 }
-      )
-    }
+    // Verificação de convite usado removida - campo não existe no schema do Vercel
 
     // Verificar se email já existe
     const existingUser = await prisma.user.findUnique({
@@ -186,9 +184,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             city: sindicatoData.cidade || null,
             state: sindicatoData.estado || null,
             zipCode: sindicatoData.cep || null,
-            maxMembers: convite.maxMembers || 100,
             active: true,
-            adminId: newUser.id
+            admin: {
+              connect: { id: newUser.id }
+            }
           }
         })
 
@@ -203,11 +202,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         // TODO: Implementar relação MEMBER-Sindicato quando schema for atualizado
       }
 
-      // Marcar convite como usado
-      await tx.convite.update({
-        where: { id: convite.id },
-        data: { usado: true }
-      })
+      // Marcar convite como usado - campo não existe no schema do Vercel
+      // await tx.convite.update({
+      //   where: { id: convite.id },
+      //   data: { usado: true }
+      // })
 
       return { user: newUser, sindicato: newSindicato }
     })

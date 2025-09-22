@@ -23,5 +23,9 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+<<<<<<< HEAD
   "exclude": ["node_modules", "dev-scripts", "scripts"]
+=======
+  "exclude": ["node_modules", "dev-scripts", "scripts", "src-backup-20250916-180348"]
+>>>>>>> 74640759d335daf9d5a1cb71db91db253842e577
 }

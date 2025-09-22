@@ -67,7 +67,7 @@ async function testEmailSend() {
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     
     console.log('✅ E-mail enviado com sucesso!')
-    console.log(`📧 Message ID: ${result.messageId}`)
+    console.log(`📧 Resultado:`, result)
     
   } catch (error: any) {
     console.error('❌ Erro ao enviar e-mail:', error)
