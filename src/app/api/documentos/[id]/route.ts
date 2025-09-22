@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Verificar se o usuário tem permissão
-    if (![UserRole.SINDICATO_ADMIN, UserRole.MEMBER].includes(user.role)) {
+    if (user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }
@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Verificar se o usuário tem permissão
-    if (![UserRole.SINDICATO_ADMIN, UserRole.MEMBER].includes(user.role)) {
+    if (user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }
@@ -208,7 +208,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Verificar se o usuário tem permissão
-    if (![UserRole.SINDICATO_ADMIN, UserRole.MEMBER].includes(user.role)) {
+    if (user.role !== UserRole.SINDICATO_ADMIN && user.role !== UserRole.MEMBER) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }

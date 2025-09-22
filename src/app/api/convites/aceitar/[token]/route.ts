@@ -5,7 +5,7 @@ import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 // GET /api/convites/aceitar/[token] - Verificar convite
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // POST /api/convites/aceitar/[token] - Aceitar convite
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params
     const data = await request.json()

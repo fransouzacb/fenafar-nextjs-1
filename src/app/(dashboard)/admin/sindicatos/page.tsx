@@ -616,7 +616,7 @@ export default function SindicatosPage() {
             : confirmationDialog.type === 'reject'
             ? 'danger'
             : confirmationDialog.type === 'block'
-            ? 'warning'
+            ? 'danger'
             : 'success'
         }
         isLoading={isProcessing}

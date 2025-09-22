@@ -19,7 +19,7 @@ export async function GET(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
+    const jwt = await import('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(
@@ -122,7 +122,7 @@ export async function PUT(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
+    const jwt = await import('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(
@@ -266,7 +266,7 @@ export async function DELETE(
     const token = authorization.replace('Bearer ', '')
     
     // Decodificar token para verificar role
-    const jwt = require('jsonwebtoken')
+    const jwt = await import('jsonwebtoken')
     const payload = jwt.decode(token) as any
     if (!payload) {
       return NextResponse.json(

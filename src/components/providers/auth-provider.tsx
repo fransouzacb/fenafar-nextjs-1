@@ -158,8 +158,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           data: {
             name: data.name,
             phone: data.phone,
-            cpf: data.cpf,
-            cargo: data.cargo,
+             cpf: (data as any).cpf,
+             cargo: (data as any).cargo,
           }
         }
       })
@@ -229,10 +229,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     ...state,
-    login,
+     login: login as any,
     logout,
     register,
-    refreshToken,
+     refreshToken: refreshToken as any,
     updateProfile,
   }
 

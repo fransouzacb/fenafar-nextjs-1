@@ -22,8 +22,8 @@ export function UniversalProfile({ userRole }: UniversalProfileProps) {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
-    cargo: user?.cargo || '',
-    cpf: user?.cpf || ''
+    cargo: (user as any)?.cargo || '',
+    cpf: (user as any)?.cpf || ''
   })
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -305,7 +305,7 @@ export function UniversalProfile({ userRole }: UniversalProfileProps) {
                       onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
                     />
                   ) : (
-                    <p className="text-sm text-gray-900">{user.cargo || 'Não informado'}</p>
+                    <p className="text-sm text-gray-900">{formData.cargo || 'Não informado'}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -317,7 +317,7 @@ export function UniversalProfile({ userRole }: UniversalProfileProps) {
                       onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
                     />
                   ) : (
-                    <p className="text-sm text-gray-900">{user.cpf || 'Não informado'}</p>
+                    <p className="text-sm text-gray-900">{formData.cpf || 'Não informado'}</p>
                   )}
                 </div>
                 <div className="space-y-2">

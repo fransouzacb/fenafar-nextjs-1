@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { LoginForm } from '@/components/forms/login-form'
 
 export default function LoginPage() {
@@ -11,7 +12,9 @@ export default function LoginPage() {
           <p className="text-caption mt-2">Sistema de Gestão</p>
         </div>
 
-        <LoginForm />
+        <Suspense fallback={<div>Carregando...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   )
